@@ -1,0 +1,47 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    env_file: .env          # reads POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD
+    ports:
+      - "127.0.0.1:5433:5432"   # 5433 on the host — avoids colliding with sundsvall-now's postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - web
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    env_file: .env          # reads DATABASE_URL, PORT, SYNC_INTERVAL, CONTACT_EMAIL, SYNC_TOKEN
+    ports:
+      - "127.0.0.1:${PORT:-3000}:${PORT:-3000}"   # localhost-only — nginx reaches it via Docker network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - web
+    restart: unless-stopped
+
+  frontend:
+    image: nginx:alpine
+    ports:
+      - "${FRONTEND_PORT:-8091}:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - backend
+    networks:
+      - web
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+
+networks:
+  web:
+    driver: bridge

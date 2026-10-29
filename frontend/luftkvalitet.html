@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Luftkvalitet – swedennu</title>
+  <!-- SEO -->
+  <meta name="description" content="PM2.5, PM10, kvävedioxid och ozon per län. Data från Open-Meteo CAMS-modellen, uppdateras varje timme.">
+  <meta name="robots" content="index, follow">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Sverige Nu">
+  <meta property="og:title" content="Luftkvalitet i Sverige per län">
+  <meta property="og:description" content="PM2.5, PM10, kvävedioxid och ozon per län. Data från Open-Meteo CAMS-modellen, uppdateras varje timme.">
+  <meta property="og:url" content="https://sverigenu.se/luftkvalitet">
+  <meta property="og:image" content="https://sverigenu.se/og-image.png">
+
+  <!-- Twitter / X -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Luftkvalitet i Sverige per län">
+  <meta name="twitter:description" content="PM2.5, PM10, kvävedioxid och ozon per län. Data från Open-Meteo CAMS-modellen, uppdateras varje timme.">
+  <meta name="twitter:image" content="https://sverigenu.se/og-image.png">  <link rel="stylesheet" href="/fonts/fonts.css">
+  <link rel="stylesheet" href="/css/nav.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" integrity="sha384-NrKB+u6Ts6AtkIhwPixiKTzgSKNblyhlk0Sohlgar9UHUBzai/sgnNNWWd291xqt" crossorigin="anonymous"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#070b13;--surface:#0d1220;--surface2:#131929;--border:#1e2a3d;
+  --text:#e8edf5;--muted:#6b7a99;--accent:#50c88c;
+  --pm10:#f5a623;--pm25:#e55a4e;--no2:#7b6cf6;--o3:#38b2d8;
+  --who-line:rgba(255,80,80,.55);
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.6}
+a{color:inherit;text-decoration:none}
+
+/* ── nav ── */
+.nav{display:flex;align-items:center;gap:1rem;padding:.9rem 1.5rem;border-bottom:1px solid var(--border);background:rgba(7,11,19,.85);backdrop-filter:blur(8px);position:sticky;top:0;z-index:100}
+.nav-back{display:flex;align-items:center;gap:.4rem;color:var(--muted);font-size:.85rem;transition:color .15s}
+.nav-back:hover{color:var(--text)}
+.nav-title{font-family:'Fraunces',serif;font-size: 1.02rem;font-weight:300;color:var(--text)}
+.nav-badge{margin-left:auto;display:flex;align-items:center;gap:.4rem;font-size:.75rem;color:var(--accent);font-family:'DM Mono',monospace}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+
+/* ── layout ── */
+.page{max-width:1100px;margin:0 auto;padding:2rem 1.5rem 4rem}
+
+/* ── hero band ── */
+.hero{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:2rem}
+.hero-cell{background:var(--surface);padding:1.25rem 1.5rem}
+.hero-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.35rem}
+.hero-val{font-family:'Fraunces',serif;font-size:2.1rem;font-weight:700;line-height:1}
+.hero-sub{font-size:.78rem;color:var(--muted);margin-top:.3rem}
+.hero-val.good{color:var(--accent)}
+.hero-val.warn{color:#f5a623}
+.hero-val.bad {color:#e55a4e}
+
+/* ── insight row ── */
+.insights{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem}
+.insight{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.25rem}
+.insight-title{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.4rem}
+.insight-body{font-size:.9rem;color:var(--text);line-height:1.5}
+.insight-body b{color:var(--accent)}
+
+/* ── section ── */
+.section-head{margin:2.5rem 0 1rem;display:flex;align-items:baseline;gap:.75rem}
+.section-title{font-family:'Fraunces',serif;font-size:1.35rem;font-weight:600;letter-spacing:-.02em}
+.section-sub{font-size:.78rem;color:var(--muted)}
+
+/* ── WHO legend ── */
+.who-legend{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1.2rem;align-items:center}
+.who-item{display:flex;align-items:center;gap:.35rem;font-size:.75rem;color:var(--muted)}
+.who-swatch{width:24px;height:2px;background:var(--who-line)}
+
+/* ── chart grid ── */
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:2rem}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.25rem}
+.chart-card.wide{grid-column:1/-1}
+.chart-label{font-size:.78rem;font-family:'DM Mono',monospace;margin-bottom:.9rem}
+.chart-label.pm10{color:var(--pm10)}
+.chart-label.pm25{color:var(--pm25)}
+.chart-label.no2 {color:var(--no2)}
+.chart-label.o3  {color:var(--o3)}
+.chart-wrap{position:relative}
+
+/* ── station table ── */
+.station-table{width:100%;border-collapse:collapse;font-size:.82rem;margin-top:.5rem}
+.station-table th{text-align:left;color:var(--muted);font-weight:500;padding:.3rem .5rem;border-bottom:1px solid var(--border);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em}
+.station-table td{padding:.3rem .5rem;border-bottom:1px solid rgba(30,42,61,.5)}
+.station-table tr:last-child td{border-bottom:none}
+.val-cell{font-family:'DM Mono',monospace;text-align:right}
+.badge-good{color:var(--accent)}
+.badge-warn{color:#f5a623}
+.badge-bad {color:#e55a4e}
+
+/* ── empty state ── */
+.empty{text-align:center;padding:3rem;color:var(--muted);font-size:.9rem}
+
+/* ── source note ── */
+.source-note{margin-top:3rem;padding:1rem 1.25rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-size: .82rem;color:var(--muted);line-height:1.6}
+.source-note a{color:var(--accent);text-decoration:underline}
+
+@media(max-width:700px){
+  .hero{grid-template-columns:1fr 1fr}
+  .insights{grid-template-columns:1fr}
+  .chart-grid{grid-template-columns:1fr}
+  .chart-card.wide{grid-column:auto}
+}
+
+    /* ── FAQ / prose ──────────────────────────────────────────────── */
+    .prose-grid { display:grid; grid-template-columns:1.3fr 1fr; gap:40px; margin-top:48px; }
+    @media(max-width:800px){ .prose-grid{ grid-template-columns:1fr; } }
+    .prose p { font-size:.92rem; line-height:1.75; color:var(--muted); margin-bottom:14px; }
+    .prose strong { color:var(--text); font-weight:600; }
+    details { border:1px solid var(--border); border-radius:10px; background:var(--card-bg); margin-bottom:8px; overflow:hidden; }
+    summary { padding:14px 18px; font-size:.88rem; font-weight:600; cursor:pointer; list-style:none; display:flex; justify-content:space-between; align-items:center; transition:color .15s; }
+    summary::-webkit-details-marker { display:none; }
+    summary::after { content:'+'; font-family:'DM Mono',monospace; color:var(--dim); transition:transform .2s; }
+    details[open] summary::after { transform:rotate(45deg); color:var(--ac); }
+    summary:hover { color:var(--ac); }
+    details p { padding:0 18px 16px; font-size:.84rem; line-height:1.7; color:var(--muted); }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="/" class="nav-back">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    Sverige Nu
+  </a>
+  <span class="nav-title">Luftkvalitet</span>
+  <div style="display:flex;gap:4px;margin-left:auto">
+    <a href="/befolkning" style="font-size:.78rem;color:#6b82a0;text-decoration:none;padding:4px 10px;border-radius:6px">Befolkning</a>
+    <a href="/polis" style="font-size:.78rem;color:#6b82a0;text-decoration:none;padding:4px 10px;border-radius:6px">Polis</a>
+    <a href="/vader" style="font-size:.78rem;color:#6b82a0;text-decoration:none;padding:4px 10px;border-radius:6px">Väder</a>
+    <a href="/trafik" style="font-size:.78rem;color:#6b82a0;text-decoration:none;padding:4px 10px;border-radius:6px">Trafik</a>
+    <a href="/ekonomi" style="font-size:.78rem;color:#6b82a0;text-decoration:none;padding:4px 10px;border-radius:6px">Ekonomi</a>
+    <a href="/energi" style="font-size:.78rem;color:#6b82a0;text-decoration:none;padding:4px 10px;border-radius:6px">Energi</a>
+    <a href="/skatt" style="font-size:.78rem;color:#6b82a0;text-decoration:none;padding:4px 10px;border-radius:6px">Skatt</a>
+    <a href="/samband">Samband</a>
+  </div>
+  <span class="nav-badge"><span class="live-dot"></span>Open-Meteo · CAMS</span>
+</nav>
+
+<main class="page">
+
+  <!-- Hero band -->
+  <div class="hero" id="hero">
+    <div class="hero-cell">
+      <div class="hero-label">Län med data</div>
+      <div class="hero-val" id="h-stations">–</div>
+      <div class="hero-sub">av 21 Sveriges län</div>
+    </div>
+    <div class="hero-cell">
+      <div class="hero-label">PM2.5 medianen</div>
+      <div class="hero-val" id="h-pm25">–</div>
+      <div class="hero-sub">µg/m³ (WHO-gräns 15)</div>
+    </div>
+    <div class="hero-cell">
+      <div class="hero-label">NO₂ medianen</div>
+      <div class="hero-val" id="h-no2">–</div>
+      <div class="hero-sub">µg/m³ (WHO-gräns 25)</div>
+    </div>
+    <div class="hero-cell">
+      <div class="hero-label">Överstiger WHO</div>
+      <div class="hero-val" id="h-exceed">–</div>
+      <div class="hero-sub">stationer i dag</div>
+    </div>
+  </div>
+
+  <!-- Insight row -->
+  <div class="insights" id="insights">
+    <div class="insight">
+      <div class="insight-title">PM2.5 — Fina partiklar</div>
+      <div class="insight-body" id="ins-pm25">Hämtar…</div>
+    </div>
+    <div class="insight">
+      <div class="insight-title">NO₂ — Kvävedioxid</div>
+      <div class="insight-body" id="ins-no2">Hämtar…</div>
+    </div>
+    <div class="insight">
+      <div class="insight-title">O₃ — Ozon</div>
+      <div class="insight-body" id="ins-o3">Hämtar…</div>
+    </div>
+  </div>
+
+  <!-- Charts per pollutant -->
+  <div class="section-head">
+    <h2 class="section-title">Alla län just nu</h2>
+    <span class="section-sub">CAMS-modell (Open-Meteo) — sortering: högst värde överst</span>
+  </div>
+
+  <div class="who-legend">
+    <span class="who-item"><span class="who-swatch"></span>WHO 24h-gränsvärde 2021</span>
+    <span class="who-item" style="color:var(--muted)">PM2.5: 15 µg/m³ · PM10: 45 µg/m³ · NO₂: 25 µg/m³ · O₃: 100 µg/m³</span>
+  </div>
+
+  <div class="chart-grid">
+    <div class="chart-card">
+      <div class="chart-label pm25">PM2.5 — Fina partiklar (µg/m³)</div>
+      <div class="chart-wrap"><canvas id="chartPm25" height="260"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-label no2">NO₂ — Kvävedioxid (µg/m³)</div>
+      <div class="chart-wrap"><canvas id="chartNo2" height="260"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-label pm10">PM10 — Grova partiklar (µg/m³)</div>
+      <div class="chart-wrap"><canvas id="chartPm10" height="260"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-label o3">O₃ — Ozon (µg/m³)</div>
+      <div class="chart-wrap"><canvas id="chartO3" height="260"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Station table -->
+  <div class="section-head">
+    <h2 class="section-title">Alla län</h2>
+    <span class="section-sub" id="station-count-label"></span>
+  </div>
+  <div id="station-table-wrap"></div>
+
+  <div class="source-note">
+    Källa: <a href="https://open-meteo.com/en/docs/air-quality-api" target="_blank" rel="noopener">Open-Meteo luftkvalitets-API</a> — kostnadsfritt, ingen nyckel krävs.
+    Modelldata från <a href="https://atmosphere.copernicus.eu/" target="_blank" rel="noopener">CAMS (Copernicus)</a> för alla 21 läns centrumpunkter.
+    WHO-gränsvärdena avser 24h-medelvärden (AQG 2021). Modellvärden kan avvika från stationsmätningar.
+    Synkroniseras varje timme.
+  </div>
+
+
+<div class="prose-grid">
+  <div class="prose">
+    <h2 class="section-title" style="margin-bottom:16px">Om <em>statistiken</em></h2>
+    <p>Luftkvalitetsdatan hämtas från <strong>Open-Meteo</strong> som i sin tur använder CAMS (Copernicus Atmosphere Monitoring Service) luftkvalitetsprognosmodell. Datan är modellbaserad och kan avvika från stationsmätningar i gatunivå, men täcker hela Sverige inklusive glesbygd.</p>
+      <p>WHO publicerade 2021 skärpta riktlinjer för luftkvalitet. PM2.5 (fina partiklar) är den parameter som orsakar mest hälsopåverkan — WHO:s nya gräns på 15 µg/m³ (dygnsmedel) är strängare än EU:s lagstadgade gräns på 25 µg/m³.</p>
+  </div>
+  <div>
+    <h2 class="section-title" style="margin-bottom:16px">Vanliga <em>frågor</em></h2>
+    <details>
+      <summary>Vad är PM2.5 och PM10?</summary>
+      <p>PM2.5 är partiklar mindre än 2,5 mikrometer — så fina att de tränger djupt in i lungorna och kan gå över i blodet. PM10 är något större (< 10 µm) och filtreras bättre av näsa och hals. Båda är skadliga vid höga koncentrationer.</p>
+    </details>
+    <details>
+      <summary>Vad är AQI?</summary>
+      <p>Air Quality Index är ett sammanfattande mått (0–500) som väger samman flera luftföroreningar. 0–50 = Bra, 51–100 = Måttlig, 101–150 = Ohälsosamt för känsliga, 151–200 = Ohälsosamt, 201+ = Mycket ohälsosamt.</p>
+    </details>
+    <details>
+      <summary>Är modelldata lika tillförlitlig som stationsmätningar?</summary>
+      <p>Stationer mäter exakt vad som finns i luften på en specifik plats. Modeller interpolerar med väderdata och emissionsdata — de är bra för bakgrundsnivåer och trender men fångar inte lokala trafikpikar lika bra.</p>
+    </details>
+    <details>
+      <summary>Varför varierar luftkvaliteten säsongsvis?</summary>
+      <p>Vintertid ökar vedeldning och vägdamm (på grund av dubbdäck och salt). Ozonnivåerna är däremot högre på sommaren när UV-strålning reagerar med kväveoxider och flyktiga organiska ämnen.</p>
+    </details>
+  </div>
+</div>
+</main>
+
+
+<script src="/js/luftkvalitet.js"></script>
+  <script src="/js/nav.js" defer></script>
+</body>
+</html>

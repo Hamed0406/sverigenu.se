@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anmälda brott i Sverige — statistik per län och kommun 1996–idag | Sverige Nu</title>
+  <!-- SEO -->
+  <meta name="description" content="Anmälda brott per 100 000 invånare per kommun och år 1996–senaste. 20+ brottskategorier från BRÅ:s öppna statistik.">
+  <meta name="robots" content="index, follow">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Sverige Nu">
+  <meta property="og:title" content="Brottslighet i Sverige per kommun">
+  <meta property="og:description" content="Anmälda brott per 100 000 invånare per kommun och år 1996–senaste. 20+ brottskategorier från BRÅ:s öppna statistik.">
+  <meta property="og:url" content="https://sverigenu.se/brott">
+  <meta property="og:image" content="https://sverigenu.se/og-image.png">
+
+  <!-- Twitter / X -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Brottslighet i Sverige per kommun">
+  <meta name="twitter:description" content="Anmälda brott per 100 000 invånare per kommun och år 1996–senaste. 20+ brottskategorier från BRÅ:s öppna statistik.">
+  <meta name="twitter:image" content="https://sverigenu.se/og-image.png">
+  <meta name="description" content="Anmälda brott per län, kommun och brottstyp 1996–idag: misshandel, inbrott, rån, bedrägeri med mera. Officiell kriminalstatistik från Brottsförebyggande rådet (BRÅ).">  <link rel="stylesheet" href="/fonts/fonts.css">
+  <link rel="stylesheet" href="/css/nav.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" integrity="sha384-NrKB+u6Ts6AtkIhwPixiKTzgSKNblyhlk0Sohlgar9UHUBzai/sgnNNWWd291xqt" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #070b13;
+      --bg2:       #0a101c;
+      --card-bg:   #0f1726;
+      --border:    #1b2940;
+      --border2:   #2a3f5f;
+      --text:      #e3ebf5;
+      --muted:     #6b82a0;
+      --dim:       #3d5270;
+      --teal:      #2dd4a0;
+      --accent2:   #5fe8c0;
+      --aurora-g:  #2dd4a0;
+      --aurora-b:  #38b6ff;
+      --aurora-v:  #7c6cff;
+      --green:     #3fb950;
+      --red:       #ff7b72;
+      --gold:      #e3b341;
+      --pink:      #e879a0;
+      --blue:      #38b6ff;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg); color: var(--text);
+      -webkit-font-smoothing: antialiased; overflow-x: hidden;
+    }
+    ::selection { background: rgba(227,179,65,.3); color: #fff; }
+    ::-webkit-scrollbar { width: 10px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: #1b2940; border-radius: 5px; border: 2px solid var(--bg); }
+
+    .grain {
+      position: fixed; inset: -50%; width: 200%; height: 200%;
+      z-index: 999; pointer-events: none; opacity: .032;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    header {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(7,11,19,.85);
+      backdrop-filter: blur(14px) saturate(1.4);
+      -webkit-backdrop-filter: blur(14px) saturate(1.4);
+      border-bottom: 1px solid rgba(27,41,64,.7);
+      padding: 0 24px; height: 58px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo {
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 900; font-size: 1.3rem;
+      color: var(--text); text-decoration: none; letter-spacing: -.02em;
+    }
+    .logo span { color: var(--teal); }
+    nav { display: flex; gap: 2px; }
+    nav a {
+      font-size: .82rem; font-weight: 500; color: var(--muted);
+      text-decoration: none; padding: 6px 12px; border-radius: 6px;
+      transition: color .15s, background .15s;
+    }
+    nav a:hover { color: var(--text); background: rgba(15,23,38,.9); }
+    nav a.active { color: var(--gold); }
+    nav a.active { color: var(--gold); }
+    @media (max-width: 640px) { nav { display: none; } }
+    .live-badge {
+      display: inline-flex; align-items: center; gap: 7px;
+      font-family: 'DM Mono', monospace; font-size: .68rem;
+      letter-spacing: .1em; text-transform: uppercase;
+      color: var(--green); padding: 5px 12px;
+      border: 1px solid rgba(63,185,80,.25); border-radius: 20px;
+      background: rgba(63,185,80,.06);
+    }
+    .live-badge::before {
+      content: ''; width: 6px; height: 6px; border-radius: 50%;
+      background: var(--green); animation: pulse 2.5s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity:1; box-shadow: 0 0 0 0 rgba(63,185,80,.4); }
+      50%      { opacity:.6; box-shadow: 0 0 0 5px rgba(63,185,80,0); }
+    }
+
+    /* ── Hero ─────────────────────────────────────── */
+    .hero {
+      position: relative; max-width: 1240px; margin: 0 auto;
+      padding: 72px 28px 48px; overflow: visible;
+    }
+    .hero::before {
+      content: ''; position: absolute; top: -80px; right: 0;
+      width: 55%; height: 360px;
+      background: radial-gradient(ellipse, rgba(227,179,65,.07), transparent 65%);
+      pointer-events: none;
+    }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 10px;
+      font-family: 'DM Mono', monospace; font-size: .68rem;
+      letter-spacing: .16em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 20px;
+    }
+    .eyebrow::before { content: ''; width: 28px; height: 1px; background: var(--gold); opacity: .6; }
+    .eyebrow a { color: inherit; text-decoration: none; }
+    h1 {
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 900; font-size: clamp(2.4rem, 5vw, 3.8rem);
+      line-height: 1.02; letter-spacing: -.03em;
+      margin-bottom: 18px; text-wrap: balance; max-width: 800px;
+    }
+    h1 em {
+      font-style: italic; font-weight: 700;
+      background: linear-gradient(105deg, var(--gold) 10%, #f0cd76 55%, var(--red) 100%);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+      padding-right: .06em;
+    }
+    .lead { font-size: 1.02rem; line-height: 1.7; color: var(--muted); max-width: 580px; }
+
+    /* ── Stat band ───────────────────────────────── */
+    .stat-band {
+      display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr;
+      gap: 1px; background: var(--border);
+      border: 1px solid var(--border); border-radius: 14px;
+      overflow: hidden; margin-top: 40px;
+    }
+    @media (max-width: 860px) { .stat-band { grid-template-columns: 1fr 1fr; } }
+    .band-cell { background: var(--card-bg); padding: 22px 22px 18px; }
+    .band-cell.primary { background: linear-gradient(135deg, #1c1708, #0f1726 70%); }
+    .band-num {
+      font-family: 'DM Mono', monospace;
+      font-size: clamp(1.5rem, 2.6vw, 2.1rem);
+      font-weight: 500; line-height: 1; font-variant-numeric: tabular-nums;
+    }
+    .band-cell.primary .band-num { color: var(--gold); font-size: clamp(1.9rem, 3.4vw, 2.8rem); }
+    .band-label {
+      font-size: .68rem; font-weight: 600; letter-spacing: .09em; text-transform: uppercase;
+      color: var(--dim); margin-top: 8px;
+    }
+    .band-sub { font-family: 'DM Mono', monospace; font-size: .68rem; color: var(--muted); margin-top: 4px; }
+    .band-sub.up   { color: var(--red); }
+    .band-sub.down { color: var(--teal); }
+
+    .rv { opacity: 0; animation: rvIn .7s cubic-bezier(.2,.8,.3,1) both; }
+    .rv-1 { animation-delay: .05s; } .rv-2 { animation-delay: .15s; }
+    .rv-3 { animation-delay: .26s; } .rv-4 { animation-delay: .38s; }
+    @keyframes rvIn {
+      from { opacity:0; transform: translateY(20px); filter: blur(3px); }
+      to   { opacity:1; transform: translateY(0); filter: blur(0); }
+    }
+
+    /* ── Insight cards ───────────────────────────── */
+    .insight-row {
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px; margin-top: 24px;
+    }
+    @media (max-width: 780px) { .insight-row { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 500px) { .insight-row { grid-template-columns: 1fr; } }
+    .insight-card {
+      background: rgba(15,23,38,.6);
+      border: 1px solid var(--border);
+      border-radius: 12px; padding: 16px 18px;
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .insight-card .ic-label {
+      font-family: 'DM Mono', monospace; font-size: .62rem;
+      letter-spacing: .12em; text-transform: uppercase; color: var(--dim);
+    }
+    .insight-card .ic-val {
+      font-family: 'DM Mono', monospace; font-size: 1.15rem;
+      font-weight: 500; font-variant-numeric: tabular-nums;
+    }
+    .insight-card .ic-desc { font-size: .82rem; color: var(--muted); line-height: 1.5; }
+    .ic-up   { color: var(--red); }
+    .ic-down { color: var(--teal); }
+    .ic-gold { color: var(--gold); }
+
+    /* ── Definition pill ─────────────────────────── */
+    .def-pill {
+      margin-top: 20px; padding: 14px 20px;
+      background: rgba(227,179,65,.05);
+      border: 1px solid rgba(227,179,65,.18);
+      border-radius: 10px; font-size: .84rem; line-height: 1.65; color: var(--muted);
+    }
+    .def-pill strong { color: var(--text); font-weight: 600; }
+    .def-tag {
+      display: inline-block;
+      font-family: 'DM Mono', monospace; font-size: .62rem;
+      letter-spacing: .1em; text-transform: uppercase; color: var(--gold);
+      background: rgba(227,179,65,.1); border: 1px solid rgba(227,179,65,.22);
+      border-radius: 5px; padding: 2px 8px; margin-right: 8px; vertical-align: middle;
+    }
+
+    /* ── Sections ─────────────────────────────────── */
+    .section { max-width: 1240px; margin: 0 auto; padding: 40px 28px; }
+    .section-header {
+      display: flex; align-items: baseline; justify-content: space-between;
+      gap: 16px; margin-bottom: 24px;
+    }
+    .section-title {
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 700; font-size: 1.35rem; letter-spacing: -.02em;
+    }
+    .section-title em { font-style: italic; color: var(--gold); font-weight: 600; }
+    .section-sub {
+      font-family: 'DM Mono', monospace; font-size: .66rem;
+      letter-spacing: .12em; text-transform: uppercase; color: var(--dim); text-align: right;
+    }
+
+    /* ── Chart card ───────────────────────────────── */
+    .chart-card {
+      background: var(--card-bg); border: 1px solid var(--border);
+      border-radius: 16px; padding: 24px; position: relative; overflow: hidden;
+    }
+    .chart-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(227,179,65,.4), transparent);
+    }
+    .chart-wrap { position: relative; height: 380px; }
+    @media (max-width: 700px) { .chart-wrap { height: 280px; } }
+    .chart-note {
+      font-family: 'DM Mono', monospace; font-size: .64rem;
+      color: var(--dim); margin-top: 14px; letter-spacing: .04em;
+    }
+
+    /* ── Measure toggle ───────────────────────────── */
+    .sex-toggle {
+      display: inline-flex; gap: 4px;
+      background: rgba(15,23,38,.8); border: 1px solid var(--border);
+      border-radius: 8px; padding: 3px;
+    }
+    .sex-btn {
+      font-family: 'DM Mono', monospace; font-size: .72rem;
+      letter-spacing: .06em; text-transform: uppercase;
+      color: var(--muted); background: none; border: none;
+      border-radius: 6px; padding: 5px 14px; cursor: pointer;
+      transition: color .15s, background .15s;
+    }
+    .sex-btn:hover { color: var(--text); }
+    .sex-btn.active {
+      color: #0b0d12; background: var(--sex-color, var(--gold));
+      box-shadow: 0 1px 8px -2px var(--sex-color, var(--gold));
+    }
+
+    /* ── Category picker chips ────────────────────── */
+    .picker { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+    .pick {
+      font-family: 'DM Mono', monospace; font-size: .7rem; letter-spacing: .04em;
+      color: var(--muted); background: rgba(15,23,38,.7);
+      border: 1px solid var(--border); border-radius: 6px; padding: 5px 10px; cursor: pointer;
+      transition: color .15s, border-color .15s, background .15s, transform .1s; user-select: none;
+    }
+    .pick:hover { transform: translateY(-1px); border-color: var(--border2); }
+    .pick.on {
+      color: #fff; border-color: var(--pick-color, var(--gold));
+      background: color-mix(in srgb, var(--pick-color, var(--gold)) 18%, transparent);
+      box-shadow: 0 0 10px -4px var(--pick-color, var(--gold));
+    }
+    .pick.maxed { opacity: .45; cursor: not-allowed; }
+
+    /* ── Horizontal bar rows ─────────────────────── */
+    .hbar-list { display: flex; flex-direction: column; gap: 7px; }
+    .hbar-row {
+      display: grid; grid-template-columns: 20px 130px 1fr 72px 72px;
+      gap: 8px; align-items: center;
+      opacity: 0; transform: translateX(-12px);
+      transition: opacity .45s cubic-bezier(.2,.8,.3,1), transform .45s cubic-bezier(.2,.8,.3,1);
+    }
+    .hbar-row.in { opacity: 1; transform: translateX(0); }
+    @media (max-width: 640px) { .hbar-row { grid-template-columns: 18px 90px 1fr 60px 52px; gap: 5px; } }
+    .hbar-rank {
+      font-family: 'DM Mono', monospace; font-size: .62rem;
+      color: var(--dim); text-align: right; user-select: none;
+    }
+    .hbar-name { font-size: .82rem; font-weight: 500; color: var(--text); text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .hbar-track {
+      height: 18px; background: rgba(27,41,64,.5); border-radius: 4px;
+      position: relative; overflow: hidden;
+    }
+    .hbar-fill {
+      position: absolute; top: 0; bottom: 0; left: 0; border-radius: 4px; width: 0;
+      transition: width .85s cubic-bezier(.2,.8,.3,1);
+      background: linear-gradient(90deg, var(--bar-from, rgba(227,179,65,.4)), var(--bar-to, var(--gold)));
+    }
+    .hbar-avg {
+      position: absolute; top: 0; bottom: 0; width: 2px;
+      background: rgba(255,255,255,.25); border-radius: 1px;
+      transition: left .85s cubic-bezier(.2,.8,.3,1);
+    }
+    .hbar-val {
+      font-family: 'DM Mono', monospace; font-size: .78rem;
+      color: var(--muted); white-space: nowrap; text-align: right;
+    }
+    .hbar-delta {
+      font-family: 'DM Mono', monospace; font-size: .72rem; white-space: nowrap; text-align: right;
+    }
+    .hbar-delta.pos { color: var(--red); }
+    .hbar-delta.neg { color: var(--teal); }
+    .hbar-delta.neu { color: var(--dim); }
+
+    .bar-legend {
+      display: flex; gap: 16px; margin-bottom: 12px;
+      font-family: 'DM Mono', monospace; font-size: .64rem; color: var(--muted);
+    }
+    .bar-legend span { display: flex; align-items: center; gap: 6px; }
+    .leg-line { width: 18px; height: 2px; background: rgba(255,255,255,.3); border-radius: 1px; }
+
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 860px) { .two-col { grid-template-columns: 1fr; } }
+
+    .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 20px; }
+    .ctrl-label {
+      font-family: 'DM Mono', monospace; font-size: .64rem;
+      letter-spacing: .1em; text-transform: uppercase; color: var(--dim);
+    }
+
+    footer {
+      max-width: 1240px; margin: 0 auto; padding: 40px 28px 60px;
+      border-top: 1px solid var(--border); font-size: .82rem; color: var(--dim);
+      display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+    }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--text); }
+  
+    /* ── FAQ / prose ──────────────────────────────────────────────── */
+    .prose-grid { display:grid; grid-template-columns:1.3fr 1fr; gap:40px; margin-top:48px; }
+    @media(max-width:800px){ .prose-grid{ grid-template-columns:1fr; } }
+    .prose p { font-size:.92rem; line-height:1.75; color:var(--muted); margin-bottom:14px; }
+    .prose strong { color:var(--text); font-weight:600; }
+    details { border:1px solid var(--border); border-radius:10px; background:var(--card-bg); margin-bottom:8px; overflow:hidden; }
+    summary { padding:14px 18px; font-size:.88rem; font-weight:600; cursor:pointer; list-style:none; display:flex; justify-content:space-between; align-items:center; transition:color .15s; }
+    summary::-webkit-details-marker { display:none; }
+    summary::after { content:'+'; font-family:'DM Mono',monospace; color:var(--dim); transition:transform .2s; }
+    details[open] summary::after { transform:rotate(45deg); color:var(--ac); }
+    summary:hover { color:var(--ac); }
+    details p { padding:0 18px 16px; font-size:.84rem; line-height:1.7; color:var(--muted); }
+  </style>
+</head>
+<body>
+<div class="grain" aria-hidden="true"></div>
+
+<header>
+  <a class="logo" href="/">Sverige<span>Nu</span></a>
+    <nav>
+    <a href="/befolkning">Befolkning</a>
+    <a href="/inkomst">Inkomst</a>
+    <a href="/polis">Polis</a>
+    <a href="/brott" class="active">Brott</a>
+    <a href="/halsa">Hälsa</a>
+    <a href="/sjukskrivning">Sjukskrivning</a>
+    <a href="/domstol">Domstol</a>
+    <a href="/riksdagen">Riksdagen</a>
+    <a href="/val">Val</a>
+    <a href="/vader">Väder</a>
+    <a href="/trafik">Trafik</a>
+    <a href="/ekonomi">Ekonomi</a>
+    <a href="/brp">BRP</a>
+    <a href="/energi">Energi</a>
+    <a href="/skatt">Skatt</a>
+    <a href="/samband">Samband</a>
+    <a href="/arbetsmarknad">Arbetsmarknad</a>
+    <a href="/utbildning">Utbildning</a>
+  </nav>
+  <span class="live-badge">Live</span>
+</header>
+
+<main>
+  <div class="hero">
+    <p class="eyebrow"><a href="/">Sverige Nu</a> &nbsp;/&nbsp; Anmälda brott</p>
+    <h1>Anmälda <em>brott</em><br>i Sverige</h1>
+    <p class="lead">Misshandel, inbrott, rån, bedrägeri och fler brottstyper per län och kommun sedan 1996. Officiell kriminalstatistik från Brottsförebyggande rådet (BRÅ).</p>
+
+    <div class="stat-band">
+      <div class="band-cell primary rv rv-1">
+        <div class="band-num" id="heroTotal">—</div>
+        <div class="band-label">Anmälda brott totalt</div>
+        <div class="band-sub" id="heroTotalYear">senaste år</div>
+      </div>
+      <div class="band-cell rv rv-2">
+        <div class="band-num" style="color:var(--blue)" id="heroPer100k">—</div>
+        <div class="band-label">Per 100 000 invånare</div>
+        <div class="band-sub" id="heroPer100kSub">riket</div>
+      </div>
+      <div class="band-cell rv rv-3">
+        <div class="band-num" id="heroYoY">—</div>
+        <div class="band-label">Förändring 1 år</div>
+        <div class="band-sub" id="heroYoYSub">—</div>
+      </div>
+      <div class="band-cell rv rv-4">
+        <div class="band-num" id="heroDecade">—</div>
+        <div class="band-label">Förändring 10 år</div>
+        <div class="band-sub" id="heroDecadeSub">—</div>
+      </div>
+    </div>
+
+    <div class="insight-row">
+      <div class="insight-card">
+        <div class="ic-label">Ökade mest senaste året</div>
+        <div class="ic-val ic-up" id="insightUp">—</div>
+        <div class="ic-desc" id="insightUpDesc">—</div>
+      </div>
+      <div class="insight-card">
+        <div class="ic-label">Minskade mest senaste året</div>
+        <div class="ic-val ic-down" id="insightDown">—</div>
+        <div class="ic-desc" id="insightDownDesc">—</div>
+      </div>
+      <div class="insight-card">
+        <div class="ic-label">Högst brottslighet per invånare</div>
+        <div class="ic-val ic-gold" id="insightCounty">—</div>
+        <div class="ic-desc" id="insightCountyDesc">—</div>
+      </div>
+    </div>
+
+    <div class="def-pill" style="margin-top:20px">
+      <span class="def-tag">Om data</span>
+      <strong>Anmälda brott</strong> är händelser som anmälts och registrerats som brott hos Polisen, Åklagarmyndigheten eller andra brottsutredande myndigheter — inte fällande domar. Förändringar över tid kan bero på anmälningsbenägenhet, lagändringar och polisens arbetssätt, inte bara den faktiska brottsligheten. Siffrorna är summor över Sveriges kommuner — brott som inte kan knytas till en kommun (t.ex. många bedrägerier på internet) ingår inte, så rikstotalen här är lägre än BRÅ:s officiella rikstotal. Källa: <strong>Brottsförebyggande rådet (BRÅ)</strong>, slutlig statistik per kalenderår.
+    </div>
+  </div>
+
+  <!-- ── Nationell trend ─────────────────────────────── -->
+  <section class="section">
+    <div class="section-header">
+      <h2 class="section-title">Utveckling <em>över tid</em></h2>
+      <span class="section-sub" id="trendSub">hela landet · 1996–</span>
+    </div>
+    <div class="chart-card">
+      <div class="controls">
+        <span class="ctrl-label">Mått</span>
+        <div class="sex-toggle" id="measureToggle">
+          <button class="sex-btn active" data-measure="count">Antal</button>
+          <button class="sex-btn" data-measure="per100k">Per 100k</button>
+        </div>
+        <span class="ctrl-label" style="margin-left:8px">Brottstyp (max 4)</span>
+      </div>
+      <div class="picker" id="trendPicker"></div>
+      <div class="chart-wrap"><canvas id="trendChart"></canvas></div>
+      <p class="chart-note">Källa: BRÅ · summa över alla kommuner · per 100k beräknat mot SCB:s länsbefolkning</p>
+    </div>
+  </section>
+
+  <!-- ── Länjämförelse + kommuntopp ──────────────────── -->
+  <section class="section">
+    <div class="section-header">
+      <h2 class="section-title">Jämför <em>län och kommuner</em></h2>
+      <span class="section-sub" id="compareSub">per 100 000 invånare</span>
+    </div>
+    <div class="controls">
+      <span class="ctrl-label">Brottstyp</span>
+      <div class="picker" id="comparePicker" style="margin-bottom:0"></div>
+    </div>
+    <div class="two-col">
+      <div class="chart-card">
+        <div style="font-family:'DM Mono',monospace;font-size: .64rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:10px" id="lanBarTitle">Per län</div>
+        <div class="bar-legend">
+          <span><span class="leg-line"></span>Rikssnitt</span>
+          <span style="color:var(--red)">▸ över snittet</span>
+          <span style="color:var(--teal)">▸ under snittet</span>
+        </div>
+        <div class="hbar-list" id="lanBarList"></div>
+        <p class="chart-note" id="lanBarNote">—</p>
+      </div>
+      <div class="chart-card">
+        <div style="font-family:'DM Mono',monospace;font-size: .64rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:10px" id="kommunBarTitle">Topp 20 kommuner</div>
+        <div class="bar-legend">
+          <span style="color:var(--dim)">BRÅ:s egen kommunberäkning per 100k</span>
+        </div>
+        <div class="hbar-list" id="kommunBarList"></div>
+        <p class="chart-note" id="kommunBarNote">—</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+  <div class="prose-grid">
+    <div class="prose">
+      <h2 class="section-title" style="margin-bottom:16px">Om <em>statistiken</em></h2>
+      <p>Brottsstatistiken hämtas från <strong>Brottsförebyggande rådet (BRÅ)</strong> och avser anmälda brott per 100 000 invånare. Det är viktigt att skilja på <em>anmälda</em> brott och faktisk brottslighet — mörkertalet varierar kraftigt beroende på brottstyp. Tillgrepp och misshandel underrapporteras mer än t.ex. stöld från butik som nästan alltid anmäls.</p>
+      <p>Länsjämförelserna är normaliserade per 100 000 invånare för att ta hänsyn till befolkningsskillnader. Storstadslänen (Stockholm, Skåne, Västra Götaland) ligger ofta högt beroende på urbaniseringsgrad — inte nödvändigtvis att det är "farligare" att bo där.</p>
+    </div>
+    <div>
+      <h2 class="section-title" style="margin-bottom:16px">Vanliga <em>frågor</em></h2>
+      <details>
+        <summary>Varför har storstadslän fler anmälda brott?</summary>
+        <p>Fler brott anmäls i tätbefolkade områden delvis för att brottsligheten är högre, men också för att anmälningsbenägenheten är högre och polisen har fler resurser att registrera händelser. Urbaniseringsgrad är den starkaste enskilda faktorn.</p>
+      </details>
+      <details>
+        <summary>Vad innebär 'brott per 100 000 invånare'?</summary>
+        <p>Det är ett normerat mått som gör länder och regioner jämförbara oavsett befolkningsstorlek. Om ett län med 200 000 invånare har 800 anmälda stölder = 400 stölder per 100 000 inv.</p>
+      </details>
+      <details>
+        <summary>Ingår alla brottstyper?</summary>
+        <p>Sidan visar ett urval av de vanligaste brotten: misshandel, stöld, rån, narkotikabrott och bedrägeri. BRÅ publicerar ca 30 kategorier — fullständig statistik finns på bra.se.</p>
+      </details>
+      <details>
+        <summary>Hur aktuell är statistiken?</summary>
+        <p>BRÅ publicerar preliminär statistik årsvis, normalt i januari–februari för föregående år. Synkronisering sker automatiskt en gång i veckan.</p>
+      </details>
+    </div>
+  </div>
+  </section>
+</main>
+
+<footer>
+  <span>Sverige Nu · Data från <a href="https://bra.se/statistik/kriminalstatistik/anmalda-brott.html" target="_blank" rel="noopener">Brottsförebyggande rådet</a> · befolkning från <a href="https://www.scb.se" target="_blank" rel="noopener">SCB</a></span>
+  <a href="/">← Tillbaka till startsidan</a>
+</footer>
+
+
+<script src="/js/brott.js"></script>
+  <script src="/js/nav.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kommunalskatt &amp; Inkomst — Sverige Nu</title>
+  <meta name="description" content="Kommunalskatt per kommun 2017–2025 samt medianinkomst och disponibel inkomst per län. Vem betalar mest och minst skatt i Sverige?">
+  <meta name="robots" content="index, follow">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Sverige Nu">
+  <meta property="og:title" content="Kommunalskatt &amp; Inkomst — Sverige Nu">
+  <meta property="og:description" content="Kommunalskatt per kommun 2017–2025 och medianinkomst per län. Källa: Skatteverket, SCB.">
+  <meta property="og:url" content="https://sverigenu.se/skatt">
+  <meta property="og:image" content="https://sverigenu.se/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="/fonts/fonts.css">
+  <link rel="stylesheet" href="/css/nav.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" integrity="sha384-NrKB+u6Ts6AtkIhwPixiKTzgSKNblyhlk0Sohlgar9UHUBzai/sgnNNWWd291xqt" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    :root {
+      --bg:#070b13; --bg2:#0a101c; --card-bg:#0f1726;
+      --border:#1b2940; --border2:#2a3f5f;
+      --text:#e3ebf5; --muted:#6b82a0; --dim:#3d5270;
+      --ac:#f5a623; --ac2:#e05ae0;
+      --green:#3fb950; --red:#ff7b72; --blue:#38b6ff;
+    }
+    html { scroll-behavior:smooth; }
+    body { font-family:'DM Sans',system-ui,sans-serif; background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased; overflow-x:hidden; }
+    ::selection { background:color-mix(in srgb,var(--ac) 30%,transparent); color:#fff; }
+    a { color:inherit; text-decoration:none; }
+    nav { display:flex; align-items:center; gap:1.5rem; padding:.9rem 2rem; border-bottom:1px solid var(--border); position:sticky; top:0; z-index:100; background:rgba(7,11,19,.92); backdrop-filter:blur(12px); flex-wrap:wrap; }
+    .nav-brand { font-family:'Fraunces',serif; font-weight:700; font-size:1.1rem; letter-spacing:-.01em; white-space:nowrap; }
+    .nav-brand span { color:var(--ac); }
+    .nav-links { display:flex; gap:1rem; flex-wrap:wrap; }
+    .nav-links a { font-size:.82rem; color:var(--muted); transition:color .2s; }
+    .nav-links a:hover, .nav-links a.active { color:#fff; }
+    /* Hero */
+    .hero { padding:4rem 2rem 2.5rem; max-width:1200px; margin:0 auto; }
+    .eyebrow { font-size:.75rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:.8rem; }
+    h1 { font-family:'Fraunces',serif; font-size:clamp(2rem,5vw,3.2rem); font-weight:700; line-height:1.1; letter-spacing:-.02em; color:#fff; margin-bottom:1rem; }
+    h1 em { color:var(--ac); font-style:normal; }
+    .lead { font-size:.95rem; color:var(--muted); max-width:600px; line-height:1.6; margin-bottom:2rem; }
+    /* KPI pills */
+    .kpi-row { display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:2.5rem; }
+    .kpi { background:var(--card-bg); border:1px solid var(--border); border-radius:12px; padding:.85rem 1.2rem; min-width:150px; }
+    .kpi.accent { border-color:color-mix(in srgb,var(--ac) 40%,var(--border)); }
+    .kpi .label { font-size:.7rem; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); margin-bottom:.3rem; }
+    .kpi .val { font-family:'DM Mono',monospace; font-size:1.4rem; font-weight:600; color:#fff; }
+    .kpi .sub { font-size:.72rem; color:var(--dim); margin-top:.2rem; }
+    /* Sections */
+    .section { padding:2.5rem 2rem; max-width:1200px; margin:0 auto; }
+    .section-hdr { display:flex; align-items:baseline; gap:.8rem; margin-bottom:1.5rem; flex-wrap:wrap; }
+    .section-hdr h2 { font-family:'Fraunces',serif; font-size:1.4rem; font-weight:700; color:#fff; }
+    .badge { font-size:.7rem; letter-spacing:.08em; text-transform:uppercase; padding:.2rem .55rem; border-radius:4px; font-weight:600; }
+    .badge-orange { background:color-mix(in srgb,var(--ac) 18%,transparent); color:var(--ac); border:1px solid color-mix(in srgb,var(--ac) 35%,transparent); }
+    .badge-purple { background:color-mix(in srgb,var(--ac2) 18%,transparent); color:var(--ac2); border:1px solid color-mix(in srgb,var(--ac2) 35%,transparent); }
+    .badge-blue   { background:color-mix(in srgb,var(--blue) 18%,transparent); color:var(--blue); border:1px solid color-mix(in srgb,var(--blue) 35%,transparent); }
+    hr.div { border:none; border-top:1px solid var(--border); margin:0 2rem; }
+    /* Cards */
+    .chart-card { background:var(--card-bg); border:1px solid var(--border); border-radius:12px; padding:1.5rem; margin-bottom:1.5rem; }
+    .chart-card canvas { max-height:360px; }
+    .two-col { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; }
+    @media(max-width:780px){ .two-col { grid-template-columns:1fr; } }
+    /* Year selector */
+    .ctrl-row { display:flex; gap:.6rem; align-items:center; flex-wrap:wrap; margin-bottom:1rem; }
+    .ctrl-row label { font-size:.78rem; color:var(--muted); }
+    select.sel { font-size:.8rem; background:var(--bg2); color:var(--text); border:1px solid var(--border2); border-radius:6px; padding:.3rem .6rem; cursor:pointer; }
+    /* Ranking list */
+    .rank-list { display:flex; flex-direction:column; gap:0; }
+    .rank-item { display:flex; align-items:center; gap:.7rem; padding:.5rem 0; border-bottom:1px solid var(--border); font-size:.86rem; }
+    .rank-item:last-child { border-bottom:none; }
+    .rank-n { font-family:'DM Mono',monospace; font-size:.7rem; color:var(--dim); width:1.8rem; text-align:right; flex-shrink:0; }
+    .rank-name { flex:1; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .rank-county { font-size:.72rem; color:var(--dim); width:70px; flex-shrink:0; }
+    .rank-bar-wrap { width:80px; height:5px; background:var(--border); border-radius:3px; flex-shrink:0; }
+    .rank-bar { height:5px; border-radius:3px; background:var(--ac); }
+    .rank-bar.low { background:var(--green); }
+    .rank-val { font-family:'DM Mono',monospace; font-size:.82rem; width:52px; text-align:right; flex-shrink:0; }
+    /* Explain boxes */
+    .explain { background:rgba(15,23,38,.8); border:1px solid var(--border); border-left:3px solid var(--border2); border-radius:10px; padding:16px 20px; margin-bottom:1.2rem; font-size:.875rem; line-height:1.72; color:var(--muted); }
+    .explain.ac-orange { border-left-color:var(--ac); }
+    .explain.ac-purple { border-left-color:var(--ac2); }
+    .explain.ac-blue   { border-left-color:var(--blue); }
+    .explain strong { color:var(--text); font-weight:600; }
+    .explain p + p { margin-top:10px; }
+    .pills { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+    .pill { display:inline-flex; flex-direction:column; background:var(--card-bg); border:1px solid var(--border); border-radius:8px; padding:8px 12px; }
+    .pill .pl { font-size:.62rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--dim); margin-bottom:2px; }
+    .pill .pv { font-size:.83rem; color:var(--text); }
+    /* Scatter tooltip */
+    .scatter-note { font-size:.78rem; color:var(--muted); margin-top:.6rem; }
+    /* Prose grid FAQ */
+    .prose-grid { display:grid; grid-template-columns:1.3fr 1fr; gap:40px; margin-top:48px; }
+    @media(max-width:800px){ .prose-grid { grid-template-columns:1fr; } }
+    .prose p { font-size:.92rem; line-height:1.75; color:var(--muted); margin-bottom:14px; }
+    .prose strong { color:var(--text); font-weight:600; }
+    details { border:1px solid var(--border); border-radius:10px; background:var(--card-bg); margin-bottom:8px; overflow:hidden; }
+    summary { padding:14px 18px; font-size:.88rem; font-weight:600; cursor:pointer; list-style:none; display:flex; justify-content:space-between; align-items:center; }
+    summary::-webkit-details-marker { display:none; }
+    summary::after { content:'+'; font-family:'DM Mono',monospace; color:var(--dim); }
+    details[open] summary::after { transform:rotate(45deg); color:var(--ac); }
+    summary:hover { color:var(--ac); }
+    details p { padding:0 18px 16px; font-size:.84rem; line-height:1.7; color:var(--muted); }
+    footer { border-top:1px solid var(--border); padding:2rem; font-size:.78rem; color:var(--dim); display:flex; gap:1rem; flex-wrap:wrap; justify-content:space-between; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-brand">Sverige<span>Nu</span></a>
+  <div class="nav-links">
+    <a href="/vader">Väder</a>
+    <a href="/polis">Polis</a>
+    <a href="/brott">Brott</a>
+    <a href="/trafik">Trafik</a>
+    <a href="/luftkvalitet">Luftkvalitet</a>
+    <a href="/ekonomi">Ekonomi</a>
+    <a href="/energi">Energi</a>
+    <a href="/skatt" class="active">Skatt</a>
+    <a href="/samband">Samband</a>
+    <a href="/inkomst">Inkomst</a>
+    <a href="/arbetsmarknad">Arbetsmarknad</a>
+    <a href="/befolkning">Befolkning</a>
+    <a href="/halsa">Hälsa</a>
+    <a href="/sjukskrivning">Sjukskrivning</a>
+    <a href="/utbildning">Utbildning</a>
+    <a href="/domstol">Domstol</a>
+    <a href="/riksdagen">Riksdagen</a>
+    <a href="/val">Val</a>
+    <a href="/brp">BRP</a>
+    <a href="/om">Om</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <p class="eyebrow">Skatt &amp; Ekonomi · Sveriges kommuner</p>
+  <h1>Kommunalskatt &amp; <em>Inkomst</em></h1>
+  <p class="lead">Kommunalskatt per av alla 290 kommuner 2017–2025, länsjämförelser, historisk trend och relation till medianinkomst. Källa: Skatteverket och SCB.</p>
+  <div class="kpi-row" id="hero-kpis">
+    <div class="kpi accent"><div class="label">Rikssnitt 2025</div><div class="val" id="kpi-avg">–<span style="font-size:.9rem;color:var(--muted)">%</span></div><div class="sub">Kommunal inkomstskatt</div></div>
+    <div class="kpi"><div class="label">Lägst 2025</div><div class="val" id="kpi-min">–</div><div class="sub" id="kpi-min-name">–</div></div>
+    <div class="kpi"><div class="label">Högst 2025</div><div class="val" id="kpi-max">–</div><div class="sub" id="kpi-max-name">–</div></div>
+    <div class="kpi"><div class="label">Spann</div><div class="val" id="kpi-span">–<span style="font-size:.9rem;color:var(--muted)">pp</span></div><div class="sub">Procentenheter max−min</div></div>
+  </div>
+</section>
+
+<hr class="div">
+
+<!-- MUNICIPALITY RANKING -->
+<section class="section">
+  <div class="section-hdr">
+    <h2>Kommunalskatt per kommun</h2>
+    <span class="badge badge-orange">2025</span>
+  </div>
+  <div class="explain ac-orange">
+    <p><strong>Kommunalskatten</strong> är den procentsats som alla förvärvsinkomster beskattas med lokalt. Den beslutas varje år av kommunfullmäktige och regionfullmäktige. Skatten finansierar skola, vård och omsorg. Lägg till landstingsskatt + begravningsavgift för totalskatten (exkl. kyrkoavgift).</p>
+    <div class="pills">
+      <div class="pill"><span class="pl">Källa</span><span class="pv">Skatteverket</span></div>
+      <div class="pill"><span class="pl">Uppdateras</span><span class="pv">Årsvis (jan)</span></div>
+      <div class="pill"><span class="pl">Historik</span><span class="pv">2017–2025</span></div>
+      <div class="pill"><span class="pl">Täckning</span><span class="pv">Alla 290 kommuner</span></div>
+    </div>
+  </div>
+  <div class="ctrl-row">
+    <label>År:</label>
+    <select class="sel" id="rank-year"></select>
+    <label style="margin-left:.8rem">Sortering:</label>
+    <select class="sel" id="rank-sort">
+      <option value="kommunal_desc">Kommunalskatt ↓ högst</option>
+      <option value="kommunal_asc">Kommunalskatt ↑ lägst</option>
+      <option value="total_desc">Totalt ↓ högst</option>
+      <option value="total_asc">Totalt ↑ lägst</option>
+    </select>
+  </div>
+  <div class="two-col">
+    <div>
+      <div style="font-size:.75rem;color:var(--muted);margin-bottom:.6rem;">Kommunalskatt (%) — Top 20</div>
+      <div id="rank-high" class="rank-list"></div>
+    </div>
+    <div>
+      <div style="font-size:.75rem;color:var(--muted);margin-bottom:.6rem;">Kommunalskatt (%) — Lägst 20</div>
+      <div id="rank-low" class="rank-list"></div>
+    </div>
+  </div>
+</section>
+
+<hr class="div">
+
+<!-- COUNTY COMPARISON -->
+<section class="section">
+  <div class="section-hdr">
+    <h2>Länsvis jämförelse</h2>
+    <span class="badge badge-blue">Snitt per län</span>
+  </div>
+  <div class="two-col">
+    <div class="chart-card"><canvas id="county-bar-chart"></canvas></div>
+    <div class="chart-card">
+      <div style="font-size:.85rem;color:var(--muted);margin-bottom:1rem;">Genomsnittlig kommunalskatt per län 2025</div>
+      <div id="county-rank-list" class="rank-list"></div>
+    </div>
+  </div>
+</section>
+
+<hr class="div">
+
+<!-- HISTORICAL TREND -->
+<section class="section">
+  <div class="section-hdr">
+    <h2>Trend 2017–2025</h2>
+    <span class="badge badge-orange">Länssnitt</span>
+  </div>
+  <div class="explain ac-orange">
+    <p>Kommunalskatten höjs i genomsnitt med 0.1–0.2 procentenheter per år. Höjningar drivs framförallt av ökade kostnader för äldrevård och LSS. Välj upp till 5 län att jämföra.</p>
+  </div>
+  <div class="chart-card">
+    <div id="trend-picks" style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1rem;"></div>
+    <canvas id="trend-chart"></canvas>
+  </div>
+</section>
+
+<hr class="div">
+
+<!-- INCOME vs TAX SCATTER -->
+<section class="section">
+  <div class="section-hdr">
+    <h2>Inkomst vs skatt</h2>
+    <span class="badge badge-purple">Länsnivå</span>
+  </div>
+  <div class="explain ac-purple">
+    <p><strong>Låg skatt ≠ låg service.</strong> Rika kommuner i Stockholm (hög inkomst, låg skatt) kan hålla nere skatten för att invånarna betalar mycket i kronor ändå. Gotland och norrlandskommuner har hög skatt och lägre medelinkomst — strukturella skillnader driver detta, inte politisk oförmåga.</p>
+  </div>
+  <div class="chart-card">
+    <canvas id="scatter-chart"></canvas>
+    <p class="scatter-note">X-axel: Medelinkomst per person (tkr, senaste år, SCB). Y-axel: Kommunalskatt (%, 2025, Skatteverket). Varje punkt = ett län. Håll pekaren för detaljer.</p>
+  </div>
+</section>
+
+<hr class="div">
+
+<!-- CORPORATE PROFITS -->
+<section class="section">
+  <div class="section-hdr">
+    <h2>Företagsöverskott per kommun</h2>
+    <span class="badge badge-orange">Juridiska personer</span>
+  </div>
+  <div class="explain ac-orange">
+    <p><strong>Juridiska personers överskott av näringsverksamhet</strong> — vinst deklarerad av aktiebolag och andra juridiska personer per kommun. Stockholm dominerar kraftigt tack vare att bolag med verksamhet i hela landet ofta har sitt säte där. Källa: Skatteverket dataset 6727f44f.</p>
+    <div class="pills">
+      <div class="pill"><span class="pl">Källa</span><span class="pv">Skatteverket</span></div>
+      <div class="pill"><span class="pl">Historik</span><span class="pv">2013–2023</span></div>
+      <div class="pill"><span class="pl">Täckning</span><span class="pv">~290 kommuner</span></div>
+    </div>
+  </div>
+  <div class="ctrl-row">
+    <label>År:</label>
+    <select class="sel" id="fo-year"></select>
+  </div>
+  <div class="two-col">
+    <div class="chart-card"><canvas id="fo-bar-chart"></canvas></div>
+    <div>
+      <div style="font-size:.75rem;color:var(--muted);margin-bottom:.6rem;">Top 20 kommuner (Mdr kr)</div>
+      <div id="fo-rank-list" class="rank-list"></div>
+    </div>
+  </div>
+</section>
+
+<hr class="div">
+
+<!-- CAPITAL INCOME -->
+<section class="section">
+  <div class="section-hdr">
+    <h2>Kapitalinkomster per län</h2>
+    <span class="badge badge-purple">Hushåll</span>
+  </div>
+  <div class="explain ac-purple">
+    <p><strong>Kapitalinkomster</strong> — räntor, utdelningar, fondvinster, bostadsvinster och schablonintäkter. Visar hur ojämnt kapitalinkomsterna är fördelade geografiskt: Stockholms län drar in mer kapital än alla andra län sammantaget. Källa: Skatteverket dataset 186462ce.</p>
+    <div class="pills">
+      <div class="pill"><span class="pl">Källa</span><span class="pv">Skatteverket</span></div>
+      <div class="pill"><span class="pl">Historik</span><span class="pv">2013–2023</span></div>
+      <div class="pill"><span class="pl">Täckning</span><span class="pv">21 län</span></div>
+    </div>
+  </div>
+  <div class="ctrl-row">
+    <label>År:</label>
+    <select class="sel" id="ki-year"></select>
+    <label style="margin-left:.8rem">Typ:</label>
+    <select class="sel" id="ki-term">
+      <option value="Summa inkomst av kapital netto">Totalt kapitalinkomst (netto)</option>
+      <option value="Ränteinkomster, utdelningar, vinst från bilaga K4 avsnitt C m.m.">Räntor &amp; utdelningar</option>
+      <option value="Schablonintäkter">Schablonintäkter (fonder/bostad)</option>
+      <option value="Vinst fondandelar m.m. Vinst från bilaga K4 avsnitt A och B, K10, K10A, K11, K12 avsnitt B och C och K13">Fondvinster</option>
+      <option value="Vinst från försäljning av småhus och bostadsrätt, bilaga K5 och K6. Återfört uppskov från bilaga K2.">Bostadsvinster</option>
+    </select>
+  </div>
+  <div class="two-col">
+    <div class="chart-card"><canvas id="ki-bar-chart"></canvas></div>
+    <div class="chart-card">
+      <div style="font-size:.85rem;color:var(--muted);margin-bottom:1rem;" id="ki-trend-title">Trend 2013–2023 per typ (Summa)</div>
+      <canvas id="ki-trend-chart"></canvas>
+    </div>
+  </div>
+</section>
+
+<hr class="div">
+
+<!-- FAKTISK SKATTEBETALNING PER PERSON -->
+<section class="section">
+  <div class="section-hdr">
+    <h2>Faktisk skattebetalning per person</h2>
+    <span class="badge badge-blue">Median per kommun</span>
+  </div>
+  <div class="explain ac-blue">
+    <p><strong>Median direkta skatter på arbete</strong> — hur mycket skattebetalare i varje kommun faktiskt betalar i direkta arbetsrelaterade skatter (kommunal + statlig inkomstskatt + pensionsavgifter). Medianen ger en rättvisare bild än snittet eftersom höginkomsttagare drar upp medelvärdet. Källa: Skatteverket dataset b904f54e.</p>
+    <div class="pills">
+      <div class="pill"><span class="pl">Källa</span><span class="pv">Skatteverket</span></div>
+      <div class="pill"><span class="pl">Historik</span><span class="pv">2013–2023</span></div>
+      <div class="pill"><span class="pl">Täckning</span><span class="pv">~290 kommuner</span></div>
+    </div>
+  </div>
+  <div class="ctrl-row">
+    <label>År:</label>
+    <select class="sel" id="spp-year"></select>
+    <label style="margin-left:.8rem">Visa:</label>
+    <select class="sel" id="spp-metric">
+      <option value="median">Median (kr)</option>
+      <option value="medel">Medel (kr)</option>
+    </select>
+  </div>
+  <div class="two-col">
+    <div class="chart-card"><canvas id="spp-bar-chart"></canvas></div>
+    <div>
+      <div style="font-size:.75rem;color:var(--muted);margin-bottom:.6rem;">Top 20 &amp; Lägst 20</div>
+      <div class="two-col" style="gap:.6rem">
+        <div id="spp-rank-high" class="rank-list"></div>
+        <div id="spp-rank-low" class="rank-list"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="div">
+
+<!-- VEM BETALAR MEST? INKOMSTNIVÅ -->
+<section class="section">
+  <div class="section-hdr">
+    <h2>Vem betalar kommunalskatt?</h2>
+    <span class="badge badge-orange">Per inkomstnivå</span>
+  </div>
+  <div class="explain ac-orange">
+    <p><strong>Kommunal inkomstskatt fördelad på inkomstnivåer</strong> — visar att 400–500 tkr-brackets betalar mest totalt, men att >= 1 mnkr-gruppen är liten med hög snitttaxa. Kommunalskatten är proportionell (flat rate), men skattebasens fördelning speglar inkomststrukturen. Källa: Skatteverket dataset f3fd610c.</p>
+    <div class="pills">
+      <div class="pill"><span class="pl">Källa</span><span class="pv">Skatteverket</span></div>
+      <div class="pill"><span class="pl">Historik</span><span class="pv">2015–2023</span></div>
+    </div>
+  </div>
+  <div class="ctrl-row">
+    <label>År:</label>
+    <select class="sel" id="niva-year"></select>
+    <label style="margin-left:.8rem">Skatt:</label>
+    <select class="sel" id="niva-term">
+      <option value="Kommunal inkomstskatt">Kommunal inkomstskatt</option>
+      <option value="Slutlig skatt">Slutlig skatt (efter reduktioner)</option>
+      <option value="Summa skatter och avgifter före skattereduktioner">Summa skatter (brutto)</option>
+      <option value="Allmän pensionsavgift på inkomst av anställning">Allmän pensionsavgift</option>
+    </select>
+  </div>
+  <div class="two-col">
+    <div class="chart-card"><canvas id="niva-bar-chart"></canvas></div>
+    <div class="chart-card">
+      <div style="font-size:.85rem;color:var(--muted);margin-bottom:1rem;">Trend per inkomstnivå 2015–2023 (Kommunal inkomstskatt)</div>
+      <canvas id="niva-trend-chart"></canvas>
+    </div>
+  </div>
+</section>
+
+<hr class="div">
+
+<!-- FAQ + OM -->
+<section class="section">
+  <div class="prose-grid">
+    <div class="prose">
+      <h2 style="font-family:'Fraunces',serif;font-size:1.4rem;font-weight:700;color:#fff;margin-bottom:16px">Om <em>statistiken</em></h2>
+      <p>Kommunalskatten hämtas från <strong>Skatteverkets öppna rowstore-API</strong> (dataset c67b320b). Data publiceras varje år i december/januari och gäller för inkomsttagare det kommande kalenderåret. Täcker alla 290 kommuner och 21 regioner 2017–2025.</p>
+      <p>Inkomstdatan (medelinkomst per person) hämtas från <strong>SCB:s PX-Web API</strong> (tabell HE0110) och avser taxerad förvärvsinkomst per vuxen invånare, aggregerat på länsnivå.</p>
+      <p>Spridningsdiagrammet visar <em>länsnivå</em> (21 punkter). Kommunal variation inom ett län kan vara stor — Österåker (16.6%) och Botkyrka (20.15%) ligger båda i Stockholms län men skiljer 3.5 procentenheter.</p>
+    </div>
+    <div>
+      <h2 style="font-family:'Fraunces',serif;font-size:1.4rem;font-weight:700;color:#fff;margin-bottom:16px">Vanliga <em>frågor</em></h2>
+      <details>
+        <summary>Betalar jag kommunalskatt eller total skatt?</summary>
+        <p>På din inkomst betalar du kommunalskatt + landstingsskatt + begravningsavgift = "summa exkl. kyrkoavgift" (typiskt 30–35%). Om du är med i Svenska kyrkan tillkommer kyrkoavgiften. Statlig inkomstskatt (20%) tillkommer på inkomster över ca 598 500 kr/år (2025).</p>
+      </details>
+      <details>
+        <summary>Varför varierar kommunalskatten så mycket?</summary>
+        <p>Skillnaderna speglar lokal service-ambition, befolkningsstruktur och skatteunderlag. En rik inflyttningkommun med många höginkomsttagare kan ha lägre skattesats och ändå finansiera god service. En glesbygdskommun med äldre befolkning och låga inkomster behöver höja skatten för att klara äldrevården.</p>
+      </details>
+      <details>
+        <summary>Ingår statlig inkomstskatt?</summary>
+        <p>Nej. Sidans data visar den kommunala skatten (kommunalskatt + landsting + begravning). Statlig inkomstskatt (20% statlig skatt) tillkommer ovanpå detta på inkomster som överstiger brytpunkten ~598 500 kr/år (2025). Arbetsgivaravgifter (~31.42%) ingår heller inte.</p>
+      </details>
+      <details>
+        <summary>Vad är "total" vs "kommunalskatt"?</summary>
+        <p>"Kommunalskatt" är bara kommunens andel (vanligen 18–23%). "Total" (summa exkl. kyrkoavgift) är kommunalskatt + regionskatt (landsting, ~10–13%) + begravningsavgift (~0.2–0.3%). Det är totalen du faktiskt betalar lokalt.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>Sverige Nu · Öppen data</span>
+  <span>Källa: Skatteverket (kommunalskatt 2017–2025) · SCB (inkomst)</span>
+  <a href="/om" style="color:var(--muted)">Om sidan</a>
+</footer>
+
+<script src="/js/skatt.js"></script>
+  <script src="/js/nav.js" defer></script>
+</body>
+</html>

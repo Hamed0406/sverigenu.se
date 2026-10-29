@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vindkraft per län — Sverige Nu</title>
+  <meta name="description" content="Vindkraftproduktion (GWh) och installerad effekt (MW) per svenska län 2003–2024. Källa: Energimyndigheten.">
+  <meta name="robots" content="index, follow">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Sverige Nu">
+  <meta property="og:title" content="Vindkraft per län — Sverige Nu">
+  <meta property="og:description" content="Elproduktion från vindkraft per invånare och installerad effekt för Sveriges 21 län 2003–2024.">
+  <meta property="og:url" content="https://sverigenu.se/vindkraft">
+  <meta property="og:image" content="https://sverigenu.se/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="/fonts/fonts.css">
+  <link rel="stylesheet" href="/css/nav.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" integrity="sha384-NrKB+u6Ts6AtkIhwPixiKTzgSKNblyhlk0Sohlgar9UHUBzai/sgnNNWWd291xqt" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    :root {
+      --bg:#070b13; --bg2:#0a101c; --card-bg:#0f1726;
+      --border:#1b2940; --border2:#2a3f5f;
+      --text:#e3ebf5; --muted:#6b82a0; --dim:#3d5270;
+      --green:#3fb950; --red:#ff7b72; --blue:#38b6ff;
+      --wind:#56e0a0;
+      --ac:var(--wind);
+    }
+    html { scroll-behavior:smooth; }
+    body { font-family:'DM Sans',system-ui,sans-serif; background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased; overflow-x:hidden; }
+    ::selection { background:color-mix(in srgb,var(--wind) 30%,transparent); color:#fff; }
+    ::-webkit-scrollbar { width:10px; }
+    ::-webkit-scrollbar-track { background:var(--bg); }
+    ::-webkit-scrollbar-thumb { background:#1b2940; border-radius:5px; border:2px solid var(--bg); }
+
+    .grain { position:fixed; inset:-50%; width:200%; height:200%; z-index:999; pointer-events:none; opacity:.032;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+    header { position:sticky; top:0; z-index:100; background:rgba(7,11,19,.85); backdrop-filter:blur(14px) saturate(1.4); border-bottom:1px solid rgba(27,41,64,.7); padding:0 24px; height:58px; display:flex; align-items:center; justify-content:space-between; }
+    .logo { font-family:'Fraunces',Georgia,serif; font-weight:900; font-size:1.3rem; color:var(--text); text-decoration:none; letter-spacing:-.02em; }
+    .logo span { color:var(--wind); }
+    nav { display:flex; gap:2px; }
+    nav a { font-size:.82rem; font-weight:500; color:var(--muted); text-decoration:none; padding:6px 12px; border-radius:6px; transition:color .15s,background .15s; }
+    nav a:hover { color:var(--text); background:rgba(15,23,38,.9); }
+    nav a.active { color:var(--wind); }
+    @media(max-width:640px) { nav { display:none; } }
+    .live-badge { display:inline-flex; align-items:center; gap:7px; font-family:'DM Mono',monospace; font-size:.68rem; letter-spacing:.1em; text-transform:uppercase; color:var(--wind); padding:5px 12px; border:1px solid rgba(86,224,160,.25); border-radius:20px; background:rgba(86,224,160,.06); }
+    .live-badge::before { content:''; width:6px; height:6px; border-radius:50%; background:var(--wind); animation:pulse 2.5s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(86,224,160,.4)} 50%{opacity:.6;box-shadow:0 0 0 5px rgba(86,224,160,0)} }
+
+    .hero { max-width:1240px; margin:0 auto; padding:72px 28px 48px; position:relative; overflow:visible; }
+    .hero::before { content:''; position:absolute; top:-80px; right:0; width:55%; height:360px; background:radial-gradient(ellipse, rgba(86,224,160,.07), transparent 65%); pointer-events:none; }
+    .eyebrow { display:inline-flex; align-items:center; gap:10px; font-family:'DM Mono',monospace; font-size:.68rem; letter-spacing:.16em; text-transform:uppercase; color:var(--wind); margin-bottom:20px; }
+    .eyebrow::before { content:''; width:28px; height:1px; background:var(--wind); opacity:.6; }
+    h1 { font-family:'Fraunces',Georgia,serif; font-weight:900; font-size:clamp(2.2rem,4.5vw,3.4rem); line-height:1.04; letter-spacing:-.03em; margin-bottom:18px; text-wrap:balance; max-width:820px; }
+    h1 em { font-style:italic; color:var(--wind); font-weight:700; }
+    .lead { font-size:1rem; line-height:1.7; color:var(--muted); max-width:640px; margin-bottom:32px; }
+
+    .stat-band { display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--border); border:1px solid var(--border); border-radius:14px; overflow:hidden; max-width:760px; }
+    @media(max-width:600px) { .stat-band { grid-template-columns:1fr 1fr; } }
+    .band-cell { background:var(--card-bg); padding:20px 22px 16px; }
+    .band-cell.hi { background:linear-gradient(135deg,rgba(86,224,160,.07),var(--bg) 70%); }
+    .band-num { font-family:'DM Mono',monospace; font-size:clamp(1.2rem,2.2vw,1.7rem); font-weight:500; line-height:1; color:var(--wind); font-variant-numeric:tabular-nums; }
+    .band-label { font-size:.66rem; font-weight:600; letter-spacing:.09em; text-transform:uppercase; color:var(--dim); margin-top:8px; }
+    .band-sub { font-family:'DM Mono',monospace; font-size:.66rem; color:var(--muted); margin-top:4px; }
+
+    .section { max-width:1240px; margin:0 auto; padding:40px 28px; }
+    .section-header { display:flex; align-items:baseline; justify-content:space-between; gap:16px; margin-bottom:24px; flex-wrap:wrap; }
+    .section-title { font-family:'Fraunces',Georgia,serif; font-weight:700; font-size:1.35rem; letter-spacing:-.02em; }
+    .section-title em { font-style:italic; color:var(--wind); font-weight:600; }
+    .section-sub { font-family:'DM Mono',monospace; font-size:.66rem; letter-spacing:.12em; text-transform:uppercase; color:var(--dim); text-align:right; }
+
+    .chart-card { background:var(--card-bg); border:1px solid var(--border); border-radius:16px; padding:24px; position:relative; overflow:hidden; }
+    .chart-card::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(86,224,160,.3),transparent); }
+    .chart-wrap { position:relative; height:340px; }
+    .chart-wrap.lg { height:420px; }
+    .chart-note { font-family:'DM Mono',monospace; font-size:.64rem; color:var(--dim); margin-top:14px; letter-spacing:.04em; }
+
+    .two-col { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+    @media(max-width:900px) { .two-col { grid-template-columns:1fr; } }
+
+    .hbar-list { display:flex; flex-direction:column; gap:5px; }
+    .hbar-row { display:grid; grid-template-columns:18px 148px 1fr 110px; gap:8px; align-items:center; }
+    @media(max-width:640px) { .hbar-row { grid-template-columns:16px 100px 1fr 80px; gap:5px; } }
+    .hbar-rank { font-family:'DM Mono',monospace; font-size:.62rem; color:var(--dim); text-align:right; }
+    .hbar-name { font-size:.82rem; font-weight:500; color:var(--text); text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .hbar-track { height:16px; background:rgba(27,41,64,.5); border-radius:3px; position:relative; overflow:hidden; }
+    .hbar-fill { position:absolute; top:0; bottom:0; left:0; border-radius:3px; transition:width .7s cubic-bezier(.2,.8,.3,1); }
+    .hbar-val { font-family:'DM Mono',monospace; font-size:.72rem; color:var(--muted); text-align:right; white-space:nowrap; display:flex; flex-direction:column; align-items:flex-end; gap:1px; }
+
+    .info-box { background:rgba(86,224,160,.05); border:1px solid rgba(86,224,160,.18); border-radius:12px; padding:18px 22px; font-size:.84rem; line-height:1.65; color:var(--muted); }
+    .info-box strong { color:var(--text); }
+    .info-box h4 { font-family:'Fraunces',Georgia,serif; font-size:1rem; font-weight:700; color:var(--text); margin-bottom:8px; }
+
+    .select-row { display:flex; align-items:center; gap:12px; margin-bottom:18px; flex-wrap:wrap; }
+    .ctrl-label { font-family:'DM Mono',monospace; font-size:.64rem; letter-spacing:.1em; text-transform:uppercase; color:var(--dim); }
+    select { background:var(--bg2); border:1px solid var(--border2); color:var(--text); font-size:.82rem; padding:6px 10px; border-radius:7px; cursor:pointer; }
+    select:focus { outline:2px solid rgba(86,224,160,.4); }
+
+    footer { max-width:1240px; margin:0 auto; padding:40px 28px 60px; border-top:1px solid var(--border); font-size:.82rem; color:var(--dim); display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+    footer a { color:var(--muted); text-decoration:none; }
+    footer a:hover { color:var(--text); }
+  </style>
+</head>
+<body>
+<div class="grain" aria-hidden="true"></div>
+
+<header>
+  <a class="logo" href="/">Sverige<span>Nu</span></a>
+  <nav>
+    <a href="/befolkning">Befolkning</a>
+    <a href="/inkomst">Inkomst</a>
+    <a href="/polis">Polis</a>
+    <a href="/brott">Brott</a>
+    <a href="/halsa">Hälsa</a>
+    <a href="/sjukskrivning">Sjukskrivning</a>
+    <a href="/domstol">Domstol</a>
+    <a href="/riksdagen">Riksdagen</a>
+    <a href="/val">Val</a>
+    <a href="/ekonomi">Ekonomi</a>
+    <a href="/brp">BRP</a>
+    <a href="/arbetsmarknad">Arbetsmarknad</a>
+    <a href="/utbildning">Utbildning</a>
+    <a href="/vindkraft" class="active">Vindkraft</a>
+  </nav>
+  <span class="live-badge">Live</span>
+</header>
+
+<main>
+  <div class="hero">
+    <p class="eyebrow">Sverige Nu &nbsp;/&nbsp; Förnybar energi</p>
+    <h1>Vindkraft <em>per län</em></h1>
+    <p class="lead">Sverige är ett av Europas ledande vindkraftsländer. Produktionen har tiodubblats sedan 2010 — men geografin avgör allt. Norrlands vidder och Sydsveriges kuster svarar för merparten av produktionen.</p>
+    <div class="stat-band">
+      <div class="band-cell hi">
+        <div class="band-num" id="heroTotal">—</div>
+        <div class="band-label">Total produktion</div>
+        <div class="band-sub" id="heroYear">—</div>
+      </div>
+      <div class="band-cell">
+        <div class="band-num" id="heroHigh" style="color:#56e0a0">—</div>
+        <div class="band-label">Störst producent</div>
+        <div class="band-sub" id="heroHighName">—</div>
+      </div>
+      <div class="band-cell">
+        <div class="band-num" id="heroMW">—</div>
+        <div class="band-label">Installerad effekt</div>
+        <div class="band-sub" id="heroMWSub">Sverige totalt</div>
+      </div>
+    </div>
+  </div>
+
+  <section class="section">
+    <div class="section-header">
+      <h2 class="section-title">Elproduktion <em>per län</em></h2>
+      <span class="section-sub">GWh · år <span id="rankingYear">—</span> · Energimyndigheten</span>
+    </div>
+    <div class="two-col">
+      <div class="chart-card">
+        <div class="hbar-list" id="rankingList"></div>
+        <p class="chart-note">Källa: Energimyndigheten EN0105 · Elproduktion från vindkraft</p>
+      </div>
+      <div class="chart-card">
+        <div class="chart-wrap"><canvas id="capacityChart"></canvas></div>
+        <p class="chart-note">Installerad effekt (MW) per län — samma år</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-header">
+      <h2 class="section-title">Historisk <em>utveckling</em></h2>
+      <span class="section-sub">GWh 2003–2024</span>
+    </div>
+    <div class="chart-card">
+      <div class="select-row">
+        <span class="ctrl-label">Välj län</span>
+        <select id="countySelect" multiple size="4" style="min-width:180px;height:auto"></select>
+      </div>
+      <div class="chart-wrap lg"><canvas id="trendChart"></canvas></div>
+      <p class="chart-note">Håll Ctrl/⌘ för att välja flera · Källa: Energimyndigheten</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="info-box">
+      <h4>Varför producerar Västernorrland mest vindkraft?</h4>
+      <p>Vindkraften följer geografi och utbyggnadstakt. <strong>Västernorrland, Norrbotten och Gävleborg</strong> har stora landarealer med stark och stabil vind — perfect för storskaliga vindparker. Skåne och Halland dominerar <strong>havsbaserad vindkraft</strong> längs Öresund och Kattegatt. Stockholm och Södermanland saknar nästan helt vindkraft — för tät bebyggelse och för lite exponerade ytor. Sveriges totala vindkraftproduktion på <strong>~40 TWh 2024</strong> motsvarar ungefär 20% av landets totala elanvändning och är nu den näst största kraftkällan efter vattenkraft.</p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <span>Sverige Nu · Öppna data</span>
+  <span>Källa: <a href="https://energimyndigheten.se" target="_blank" rel="noopener">Energimyndigheten EN0105</a> · Uppdateras årligen</span>
+</footer>
+
+<script src="/js/vindkraft.js"></script>
+  <script src="/js/nav.js" defer></script>
+</body>
+</html>

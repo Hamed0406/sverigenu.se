@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inkomster i Sverige — snitt och median per län 1991–2024 | Sverige Nu</title>
+  <!-- SEO -->
+  <meta name="description" content="Medianinkomst och medelinkomst per kommun 1991–2024. Skuldsättning hos Kronofogden per kommun. Källa: SCB och Kolada.">
+  <meta name="robots" content="index, follow">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Sverige Nu">
+  <meta property="og:title" content="Inkomst och skuldsättning per kommun">
+  <meta property="og:description" content="Medianinkomst och medelinkomst per kommun 1991–2024. Skuldsättning hos Kronofogden per kommun. Källa: SCB och Kolada.">
+  <meta property="og:url" content="https://sverigenu.se/inkomst">
+  <meta property="og:image" content="https://sverigenu.se/og-image.png">
+
+  <!-- Twitter / X -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Inkomst och skuldsättning per kommun">
+  <meta name="twitter:description" content="Medianinkomst och medelinkomst per kommun 1991–2024. Skuldsättning hos Kronofogden per kommun. Källa: SCB och Kolada.">
+  <meta name="twitter:image" content="https://sverigenu.se/og-image.png">
+  <meta name="description" content="Medelinkomst och medianinkomst per län 1991–2024 från SCB, plus arbetslöshet per kommun från Kolada. Se hur inkomsterna skiljer sig mellan Sveriges 21 län.">  <link rel="stylesheet" href="/fonts/fonts.css">
+  <link rel="stylesheet" href="/css/nav.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" integrity="sha384-NrKB+u6Ts6AtkIhwPixiKTzgSKNblyhlk0Sohlgar9UHUBzai/sgnNNWWd291xqt" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #070b13;
+      --bg2:       #0a101c;
+      --card-bg:   #0f1726;
+      --border:    #1b2940;
+      --border2:   #2a3f5f;
+      --text:      #e3ebf5;
+      --muted:     #6b82a0;
+      --dim:       #3d5270;
+      --accent:    #4fa3e8;
+      --accent2:   #79c0ff;
+      --aurora-g:  #2dd4a0;
+      --aurora-b:  #38b6ff;
+      --aurora-v:  #7c6cff;
+      --green:     #3fb950;
+      --red:       #ff7b72;
+      --gold:      #e3b341;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    ::selection { background: rgba(79,163,232,.35); color: #fff; }
+    ::-webkit-scrollbar { width: 10px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: #1b2940; border-radius: 5px; border: 2px solid var(--bg); }
+
+    .grain {
+      position: fixed; inset: -50%;
+      width: 200%; height: 200%;
+      z-index: 999; pointer-events: none; opacity: .032;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    header {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(7,11,19,.85);
+      backdrop-filter: blur(14px) saturate(1.4);
+      -webkit-backdrop-filter: blur(14px) saturate(1.4);
+      border-bottom: 1px solid rgba(27,41,64,.7);
+      padding: 0 24px; height: 58px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo {
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 900; font-size: 1.3rem;
+      color: var(--text); text-decoration: none; letter-spacing: -.02em;
+    }
+    .logo span { color: var(--accent); }
+    nav { display: flex; gap: 2px; }
+    nav a {
+      font-size: .82rem; font-weight: 500; color: var(--muted);
+      text-decoration: none; padding: 6px 12px; border-radius: 6px;
+      transition: color .15s, background .15s;
+    }
+    nav a:hover { color: var(--text); background: rgba(15,23,38,.9); }
+    nav a.active { color: var(--gold); }
+    nav a.active { color: var(--accent2); }
+    @media (max-width: 640px) { nav { display: none; } }
+    .live-badge {
+      display: inline-flex; align-items: center; gap: 7px;
+      font-family: 'DM Mono', monospace; font-size: .68rem;
+      letter-spacing: .1em; text-transform: uppercase;
+      color: var(--green); padding: 5px 12px;
+      border: 1px solid rgba(63,185,80,.25); border-radius: 20px;
+      background: rgba(63,185,80,.06);
+    }
+    .live-badge::before {
+      content: ''; width: 6px; height: 6px; border-radius: 50%;
+      background: var(--green);
+      animation: pulse 2.5s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; box-shadow: 0 0 0 0 rgba(63,185,80,.4); }
+      50%      { opacity: .6; box-shadow: 0 0 0 5px rgba(63,185,80,0); }
+    }
+
+    /* ── Hero ─────────────────────────────────────── */
+    .hero {
+      position: relative;
+      max-width: 1240px; margin: 0 auto;
+      padding: 72px 28px 48px;
+      overflow: visible;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -80px; right: 0;
+      width: 55%; height: 360px;
+      background: radial-gradient(ellipse, rgba(227,179,65,.07), transparent 65%);
+      pointer-events: none;
+    }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 10px;
+      font-family: 'DM Mono', monospace; font-size: .68rem;
+      letter-spacing: .16em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 20px;
+    }
+    .eyebrow::before { content: ''; width: 28px; height: 1px; background: var(--accent); opacity: .6; }
+    .eyebrow a { color: inherit; text-decoration: none; }
+
+    h1 {
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 900;
+      font-size: clamp(2.4rem, 5vw, 3.8rem);
+      line-height: 1.02; letter-spacing: -.03em;
+      margin-bottom: 18px; text-wrap: balance;
+      max-width: 800px;
+    }
+    h1 em {
+      font-style: italic; font-weight: 700;
+      background: linear-gradient(105deg, var(--gold) 10%, #f4c842 60%, var(--aurora-g) 100%);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+      padding-right: .06em;
+    }
+    .lead { font-size: 1.02rem; line-height: 1.7; color: var(--muted); max-width: 580px; }
+
+    .stat-band {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr 1fr 1fr;
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      margin-top: 40px;
+    }
+    @media (max-width: 860px) { .stat-band { grid-template-columns: 1fr 1fr; } }
+    .band-cell { background: var(--card-bg); padding: 22px 22px 18px; position: relative; }
+    .band-cell.primary { background: linear-gradient(135deg, #0f1d2c, #0f1726 70%); }
+    .band-num {
+      font-family: 'DM Mono', monospace;
+      font-size: clamp(1.5rem, 2.6vw, 2.1rem);
+      font-weight: 500; line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+    .band-cell.primary .band-num { color: var(--gold); font-size: clamp(1.9rem, 3.4vw, 2.8rem); }
+    .band-label {
+      font-size: .68rem; font-weight: 600;
+      letter-spacing: .09em; text-transform: uppercase;
+      color: var(--dim); margin-top: 8px;
+    }
+    .band-sub { font-family: 'DM Mono', monospace; font-size: .68rem; color: var(--muted); margin-top: 4px; }
+
+    .rv { opacity: 0; animation: rvIn .7s cubic-bezier(.2,.8,.3,1) both; }
+    .rv-1 { animation-delay: .05s; } .rv-2 { animation-delay: .15s; }
+    .rv-3 { animation-delay: .26s; } .rv-4 { animation-delay: .38s; }
+    @keyframes rvIn {
+      from { opacity: 0; transform: translateY(20px); filter: blur(3px); }
+      to   { opacity: 1; transform: translateY(0); filter: blur(0); }
+    }
+
+    /* ── Definition pill ─────────────────────────── */
+    .def-pill {
+      margin-top: 20px;
+      padding: 14px 20px;
+      background: rgba(227,179,65,.06);
+      border: 1px solid rgba(227,179,65,.2);
+      border-radius: 10px;
+      font-size: .84rem; line-height: 1.65;
+      color: var(--muted);
+    }
+    .def-pill strong { color: var(--text); font-weight: 600; }
+    .def-tag {
+      display: inline-block;
+      font-family: 'DM Mono', monospace; font-size: .62rem;
+      letter-spacing: .1em; text-transform: uppercase;
+      color: var(--gold);
+      background: rgba(227,179,65,.12);
+      border: 1px solid rgba(227,179,65,.25);
+      border-radius: 5px;
+      padding: 2px 8px;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    /* ── Sections ─────────────────────────────────── */
+    .section { max-width: 1240px; margin: 0 auto; padding: 40px 28px; }
+    .section-header {
+      display: flex; align-items: baseline; justify-content: space-between;
+      gap: 16px; margin-bottom: 24px;
+    }
+    .section-title {
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 700; font-size: 1.35rem;
+      letter-spacing: -.02em;
+    }
+    .section-title em { font-style: italic; color: var(--gold); font-weight: 600; }
+    .section-sub {
+      font-family: 'DM Mono', monospace; font-size: .66rem;
+      letter-spacing: .12em; text-transform: uppercase; color: var(--dim);
+      text-align: right;
+    }
+
+    /* ── Chart card ───────────────────────────────── */
+    .chart-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .chart-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(227,179,65,.45), transparent);
+    }
+    .chart-wrap { position: relative; height: 420px; }
+    @media (max-width: 700px) { .chart-wrap { height: 300px; } }
+
+    /* county picker chips */
+    .picker {
+      display: flex; flex-wrap: wrap; gap: 6px;
+      margin-bottom: 20px;
+    }
+    .pick {
+      font-family: 'DM Mono', monospace;
+      font-size: .7rem; letter-spacing: .04em;
+      color: var(--muted);
+      background: rgba(15,23,38,.7);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 5px 11px;
+      cursor: pointer;
+      transition: color .15s, border-color .15s, background .15s, transform .1s;
+      user-select: none;
+    }
+    .pick:hover { transform: translateY(-1px); border-color: var(--border2); }
+    .pick.on {
+      color: #fff;
+      border-color: var(--pc, var(--accent));
+      background: color-mix(in srgb, var(--pc, var(--accent)) 18%, transparent);
+      box-shadow: 0 0 12px -4px var(--pc, var(--accent));
+    }
+    .chart-note {
+      font-family: 'DM Mono', monospace; font-size: .64rem;
+      color: var(--dim); margin-top: 14px;
+      letter-spacing: .04em;
+    }
+    .chart-empty {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--dim); font-family: 'DM Mono', monospace; font-size: .82rem;
+    }
+    .chart-empty[hidden] { display: none; }
+
+    /* ── Inequality bar chart section ─────────────── */
+    .ineq-grid { display: flex; flex-direction: column; gap: 7px; }
+    .ineq-row {
+      display: grid;
+      grid-template-columns: 150px 1fr 100px;
+      gap: 12px; align-items: center;
+      opacity: 0; transform: translateX(-14px);
+      transition: opacity .5s cubic-bezier(.2,.8,.3,1), transform .5s cubic-bezier(.2,.8,.3,1);
+    }
+    .ineq-row.in { opacity: 1; transform: translateX(0); }
+    @media (max-width: 600px) { .ineq-row { grid-template-columns: 100px 1fr 90px; gap: 8px; } }
+    .ineq-name { font-size: .82rem; font-weight: 500; color: var(--text); text-align: right; }
+    .ineq-track { height: 20px; background: rgba(27,41,64,.4); border-radius: 4px; position: relative; overflow: hidden; }
+    .ineq-mean {
+      position: absolute; top: 0; bottom: 0; left: 0;
+      border-radius: 4px;
+      background: linear-gradient(90deg, rgba(227,179,65,.45), var(--gold));
+      width: 0;
+      transition: width .9s cubic-bezier(.2,.8,.3,1);
+    }
+    .ineq-median {
+      position: absolute; top: 3px; bottom: 3px; left: 0;
+      border-radius: 3px;
+      background: rgba(56,182,255,.55);
+      width: 0;
+      transition: width 1s cubic-bezier(.2,.8,.3,1) .05s;
+    }
+    .ineq-val {
+      font-family: 'DM Mono', monospace; font-size: .78rem;
+      color: var(--muted); font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+    .ineq-legend {
+      display: flex; gap: 16px; margin-bottom: 16px;
+      font-family: 'DM Mono', monospace; font-size: .68rem; color: var(--muted);
+      letter-spacing: .06em;
+    }
+    .ineq-legend span { display: flex; align-items: center; gap: 6px; }
+    .ineq-legend .swatch { width: 16px; height: 8px; border-radius: 3px; }
+
+    /* ── Municipality tables ──────────────────────── */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 800px) { .two-col { grid-template-columns: 1fr; } }
+    .table-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 22px;
+    }
+    .table-title {
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 700; font-size: 1.02rem;
+      margin-bottom: 14px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .table-title .dot { width: 7px; height: 7px; border-radius: 50%; }
+    .mtable { width: 100%; border-collapse: collapse; }
+    .mtable td {
+      padding: 8px 4px;
+      border-bottom: 1px solid rgba(27,41,64,.5);
+      font-size: .84rem;
+    }
+    .mtable tr:last-child td { border-bottom: none; }
+    .mtable .rank { font-family: 'DM Mono', monospace; font-size: .68rem; color: var(--dim); width: 28px; }
+    .mtable .mname { color: var(--text); font-weight: 500; }
+    .mtable .mcounty { font-family: 'DM Mono', monospace; font-size: .62rem; color: var(--dim); text-transform: uppercase; letter-spacing: .08em; }
+    .mtable .mval { font-family: 'DM Mono', monospace; font-size: .82rem; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
+
+    /* ── FAQ / prose ──────────────────────────────── */
+    .prose-grid { display: grid; grid-template-columns: 1.3fr 1fr; gap: 40px; }
+    @media (max-width: 800px) { .prose-grid { grid-template-columns: 1fr; } }
+    .prose p { font-size: .92rem; line-height: 1.75; color: var(--muted); margin-bottom: 14px; }
+    .prose strong { color: var(--text); font-weight: 600; }
+    details {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--card-bg);
+      margin-bottom: 8px;
+      overflow: hidden;
+    }
+    summary {
+      padding: 14px 18px;
+      font-size: .88rem; font-weight: 600;
+      cursor: pointer; list-style: none;
+      display: flex; justify-content: space-between; align-items: center;
+      transition: color .15s;
+    }
+    summary::-webkit-details-marker { display: none; }
+    summary::after { content: '+'; font-family: 'DM Mono', monospace; color: var(--dim); transition: transform .2s; }
+    details[open] summary::after { transform: rotate(45deg); color: var(--gold); }
+    summary:hover { color: var(--accent2); }
+    details p { padding: 0 18px 16px; font-size: .84rem; line-height: 1.7; color: var(--muted); }
+
+    /* ── Footer ───────────────────────────────────── */
+    footer {
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      padding: 36px 28px;
+      margin-top: 48px;
+    }
+    .footer-inner {
+      max-width: 1240px; margin: 0 auto;
+      display: flex; justify-content: space-between; flex-wrap: wrap; gap: 14px;
+    }
+    .footer-logo { font-family: 'Fraunces', Georgia, serif; font-weight: 900; font-size: 1rem; color: var(--muted); }
+    .footer-logo span { color: var(--accent); }
+    .footer-text { font-size: .72rem; color: var(--dim); line-height: 1.7; text-align: right; }
+    .footer-text a { color: var(--muted); text-decoration: none; }
+    .footer-text a:hover { color: var(--accent); }
+  </style>
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+
+<header>
+  <a href="/" class="logo">Sverige<span>Nu</span></a>
+    <nav>
+    <a href="/befolkning">Befolkning</a>
+    <a href="/inkomst" class="active">Inkomst</a>
+    <a href="/polis">Polis</a>
+    <a href="/brott">Brott</a>
+    <a href="/halsa">Hälsa</a>
+    <a href="/sjukskrivning">Sjukskrivning</a>
+    <a href="/domstol">Domstol</a>
+    <a href="/riksdagen">Riksdagen</a>
+    <a href="/val">Val</a>
+    <a href="/vader">Väder</a>
+    <a href="/trafik">Trafik</a>
+    <a href="/ekonomi">Ekonomi</a>
+    <a href="/brp">BRP</a>
+    <a href="/energi">Energi</a>
+    <a href="/skatt">Skatt</a>
+    <a href="/samband">Samband</a>
+    <a href="/arbetsmarknad">Arbetsmarknad</a>
+    <a href="/utbildning">Utbildning</a>
+  </nav>
+  <span class="live-badge">SCB · Kolada</span>
+</header>
+
+<section class="hero">
+  <p class="eyebrow rv rv-1"><a href="/">Sverige Nu</a> · Inkomster · 1991–2024</p>
+  <h1 class="rv rv-2">Vad tjänar <em>Sverige</em>, riktigt?</h1>
+  <p class="lead rv rv-3">34 år av inkomstdata direkt från SCB:s öppna API — medelinkomst och medianinkomst per län sedan 1991, plus arbetslöshet per kommun från Kolada.</p>
+
+  <div class="stat-band rv rv-4">
+    <div class="band-cell primary">
+      <div class="band-num" id="nat-mean">—</div>
+      <div class="band-label">Rikssnitt, medelinkomst</div>
+      <div class="band-sub" id="nat-year">senaste år</div>
+    </div>
+    <div class="band-cell">
+      <div class="band-num" id="nat-median">—</div>
+      <div class="band-label">Rikssnitt, medianinkomst</div>
+      <div class="band-sub" id="median-sub">20+ år</div>
+    </div>
+    <div class="band-cell">
+      <div class="band-num" id="top-lan">—</div>
+      <div class="band-label">Högst medelinkomst</div>
+      <div class="band-sub" id="top-val"></div>
+    </div>
+    <div class="band-cell">
+      <div class="band-num" id="bot-lan">—</div>
+      <div class="band-label">Lägst medelinkomst</div>
+      <div class="band-sub" id="bot-val"></div>
+    </div>
+  </div>
+
+  <!-- definition pill -->
+  <div class="def-pill rv rv-4" style="animation-delay:.5s">
+    <span class="def-tag">Årsbruttoinkomst</span>
+    Siffrorna visar <strong>årlig förvärvsinkomst före skatt</strong> (brutto) i tusentals kronor (tkr).
+    Det är inte månadslön — dividera med 12 för ungefärlig månadslön brutto.
+    Källa: SCB:s samtaxerade inkomststatistik (HE0110), personer 20 år och äldre.
+  </div>
+</section>
+
+<!-- Time series -->
+<section class="section">
+  <div class="section-header">
+    <h2 class="section-title">Medelinkomst över tid — <em>välj län</em></h2>
+    <span class="section-sub">SCB HE0110<br>1991–2024 · tkr</span>
+  </div>
+  <div class="chart-card">
+    <div class="picker" id="picker"></div>
+    <div class="chart-wrap">
+      <canvas id="ts-chart"></canvas>
+      <div class="chart-empty" id="chart-empty" hidden>Kunde inte nå API:et — prova att ladda om sidan.</div>
+    </div>
+    <p class="chart-note" id="chart-note">Klicka på länen för att jämföra. Max 6 samtidigt. — Heldragna linjer = medelinkomst, streckade = medianinkomst. Årsbruttoinkomst (före skatt) · 20+ år · löpande priser · tkr = tusen kronor.</p>
+  </div>
+</section>
+
+<!-- Mean vs Median (inequality) -->
+<section class="section">
+  <div class="section-header">
+    <h2 class="section-title">Snitt vs median — <em>inkomstspridning</em></h2>
+    <span class="section-sub">senaste år<br>sorterat efter snitt</span>
+  </div>
+  <div class="chart-card">
+    <div class="ineq-legend">
+      <span><span class="swatch" style="background:var(--gold)"></span>Medelinkomst</span>
+      <span><span class="swatch" style="background:rgba(56,182,255,.7)"></span>Medianinkomst</span>
+    </div>
+    <div class="ineq-grid" id="ineq-grid"></div>
+    <p class="chart-note" style="margin-top:12px">Alla siffror: årsbruttoinkomst före skatt (tkr). Stor skillnad mellan snitt och median indikerar att ett fåtal höga inkomster drar upp snittet — medianen är det mer representativa måttet för "vanliga" löntagare.</p>
+  </div>
+</section>
+
+<!-- Unemployment tables -->
+<section class="section">
+  <div class="section-header">
+    <h2 class="section-title">Arbetslöshet — <em>kommunerna</em></h2>
+    <span class="section-sub">Kolada N03920<br>senaste period · %</span>
+  </div>
+  <div class="two-col">
+    <div class="table-card">
+      <div class="table-title"><span class="dot" style="background:var(--red)"></span>Högst arbetslöshet</div>
+      <table class="mtable"><tbody id="high-unemp"></tbody></table>
+    </div>
+    <div class="table-card">
+      <div class="table-title"><span class="dot" style="background:var(--aurora-g)"></span>Lägst arbetslöshet</div>
+      <table class="mtable"><tbody id="low-unemp"></tbody></table>
+    </div>
+  </div>
+</section>
+
+<!-- Kronofogden debt -->
+<section class="section">
+  <div class="section-header">
+    <h2 class="section-title">Skuldsättning — <em>Kronofogden</em></h2>
+    <span class="section-sub">Kolada N00989 · N00990<br>andel skuldsatta · medianskuld</span>
+  </div>
+  <div class="two-col">
+    <div class="table-card">
+      <div class="table-title"><span class="dot" style="background:var(--red)"></span>Störst andel skuldsatta</div>
+      <table class="mtable"><tbody id="high-debt"></tbody></table>
+      <div style="font-size:.75rem;color:var(--muted);margin-top:.5rem">% av invånarna hos Kronofogden</div>
+    </div>
+    <div class="table-card">
+      <div class="table-title"><span class="dot" style="background:var(--red)"></span>Högst medianskuld</div>
+      <table class="mtable"><tbody id="high-debt-median"></tbody></table>
+      <div style="font-size:.75rem;color:var(--muted);margin-top:.5rem">kr medianskuld per skuldsatt person</div>
+    </div>
+  </div>
+</section>
+
+<!-- Prose + FAQ -->
+<section class="section">
+  <div class="prose-grid">
+    <div class="prose">
+      <h2 class="section-title" style="margin-bottom:16px">Om <em>statistiken</em></h2>
+      <p>Inkomstdata hämtas från <strong>SCB:s öppna PX-Web-API</strong> (tabell HE0110 — Samordnad individbaserad inkomst och taxeringsstatistik). Serien sträcker sig från 1991 till senast publicerat år och avser samtaxerad förvärvsinkomst för personer 20 år och äldre.</p>
+      <p><strong>Medelinkomst</strong> påverkas av höga inkomster i toppen och är därför alltid högre än medianen. <strong>Medianen</strong> är det mer representativa måttet — hälften av befolkningen tjänar mer, hälften mindre. Ju större gap, desto mer koncentrerade är inkomsterna hos ett fåtal.</p>
+      <p>Arbetslöshetsdata per kommun kommer från <strong>Kolada</strong> (nyckeltal N03920, Arbetslöshet 18–64 år) och baseras på AMS/Arbetsförmedlingens månadsstatistik.</p>
+      <p>Kronofogdedata (N00989, N00990) visar andelen invånare 18+ med skulder hos Kronofogden respektive deras medianskuld — ett mått på ekonomisk utsatthet utöver arbetslöshet och inkomst.</p>
+    </div>
+    <div>
+      <h2 class="section-title" style="margin-bottom:16px">Vanliga <em>frågor</em></h2>
+      <details>
+        <summary>Varför är medelinkomsten alltid högre än medianen?</summary>
+        <p>Inkomstfördelningen är högersnedvriden — ett litet antal mycket höga inkomster drar upp snittet. Medianen påverkas inte av extremvärden och ger därför en bättre bild av vad en "vanlig" person tjänar.</p>
+      </details>
+      <details>
+        <summary>Är siffrorna inflationsjusterade?</summary>
+        <p>Nej, siffrorna är i löpande priser (nominella kronor). Den faktiska köpkraftsutvecklingen är lägre när man räknar bort inflation — KPI-justerade tidsserier finns hos SCB men ingår inte i detta dataset.</p>
+      </details>
+      <details>
+        <summary>Hur ofta uppdateras datan?</summary>
+        <p>SCB-data synkas en gång per dygn och Kolada två gånger per dygn. SCB publicerar ny årsstatistik vanligtvis i maj–juni varje år; den dyker upp här automatiskt.</p>
+      </details>
+      <details>
+        <summary>Varför börjar serien 1991?</summary>
+        <p>1991 är det första året i SCB:s sammanhängande serie för samordnad individbaserad inkomst- och taxeringsstatistik med nuvarande länsindelning.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">Sverige<span>Nu</span></div>
+    <p class="footer-text">
+      Data: <a href="https://scb.se">SCB</a> (HE0110) · <a href="https://kolada.se">Kolada</a> (N03920, N00989, N00990)<br>
+      Samtaxerad förvärvsinkomst 20+ år, löpande priser.
+    </p>
+  </div>
+</footer>
+
+
+<script src="/js/inkomst.js"></script>
+  <script src="/js/nav.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Om Sverige Nu — Hamed Adeli</title>
+<meta name="description" content="Sverige Nu är ett öppet dashboard för svensk offentlig data — byggd av Hamed Adeli. 20 datakällor, 16 ämnesområden, daglig uppdatering. Gratis, utan reklam.">
+<meta name="robots" content="index, follow">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Sverige Nu">
+<meta property="og:title" content="Om Sverige Nu — Hamed Adeli">
+<meta property="og:description" content="Sverige Nu är ett öppet dashboard för svensk offentlig data. 20 datakällor, 16 ämnesområden, daglig uppdatering. Gratis, utan reklam.">
+<meta property="og:url" content="https://sundsvallnu.se/om">
+<meta property="og:image" content="https://sundsvallnu.se/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Om Sverige Nu — Hamed Adeli">
+<meta name="twitter:description" content="Sverige Nu är ett öppet dashboard för svensk offentlig data. 20 datakällor, 16 ämnesområden, daglig uppdatering.">
+<meta name="twitter:image" content="https://sundsvallnu.se/og-image.png">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23070b13'/><circle cx='16' cy='16' r='6' fill='none' stroke='%232dd4a0' stroke-width='2.5'/><circle cx='16' cy='16' r='2.5' fill='%232dd4a0'/></svg>">
+<link rel="stylesheet" href="/fonts/fonts.css">
+  <link rel="stylesheet" href="/css/nav.css">
+<style>
+:root {
+  --bg:        #070b13;
+  --bg2:       #0c1220;
+  --card-bg:   #0f1829;
+  --card-hover:#131f33;
+  --border:    #1a2a42;
+  --border2:   #243858;
+  --text:      #dde6f0;
+  --muted:     #6b82a0;
+  --dim:       #3a5070;
+  --teal:      #2dd4a0;
+  --teal-glow: rgba(45,212,160,.12);
+  --blue:      #38b6ff;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', system-ui, sans-serif;
+  min-height: 100vh;
+  line-height: 1.6;
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: -150px;
+  left: 30%;
+  width: 800px;
+  height: 600px;
+  background: radial-gradient(ellipse at center, rgba(45,212,160,.05) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+main, header, footer { position: relative; z-index: 1; }
+
+a { color: var(--teal); text-decoration: none; transition: color .15s; }
+a:hover { color: #5eefc0; text-decoration: underline; }
+:focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; border-radius: 4px; }
+
+/* ── HEADER ── */
+.site-header {
+  padding: 0 24px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(7,11,19,.85);
+  backdrop-filter: blur(12px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: stretch;
+  min-height: 56px;
+}
+
+.logo-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  font-size: .95rem;
+  text-decoration: none;
+  flex-shrink: 0;
+  padding: 0 20px 0 0;
+  border-right: 1px solid var(--border);
+  transition: color .15s;
+}
+.logo-link:hover { color: #fff; text-decoration: none; }
+
+.logo-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--teal);
+  box-shadow: 0 0 10px var(--teal);
+  flex-shrink: 0;
+  animation: pulse-dot 2.5s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+  0%,100% { opacity:1; box-shadow: 0 0 10px var(--teal); }
+  50%      { opacity:.5; box-shadow: 0 0 4px var(--teal); }
+}
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 0 4px;
+  flex: 1;
+}
+.site-nav::-webkit-scrollbar { display: none; }
+.site-nav a {
+  display: flex;
+  align-items: center;
+  height: 56px;
+  padding: 0 12px;
+  font-size: .8rem;
+  font-weight: 500;
+  color: var(--muted);
+  white-space: nowrap;
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  transition: color .15s, border-color .15s;
+  flex-shrink: 0;
+}
+.site-nav a:hover { color: var(--text); text-decoration: none; }
+.site-nav a.active { color: var(--teal); border-bottom-color: var(--teal); }
+
+/* ── HERO ── */
+.hero {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 72px 24px 48px;
+  animation: fade-up .65s ease both;
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.hero-eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: .75rem;
+  color: var(--teal);
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.hero-eyebrow::before {
+  content: '';
+  display: block;
+  width: 24px;
+  height: 1px;
+  background: var(--teal);
+}
+
+.hero h1 {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: clamp(2.4rem, 6vw, 4rem);
+  font-weight: 900;
+  font-optical-sizing: auto;
+  letter-spacing: -2px;
+  color: #fff;
+  line-height: 1.05;
+  margin-bottom: 28px;
+}
+
+.hero h1 em {
+  font-style: italic;
+  color: var(--teal);
+  font-weight: 400;
+}
+
+.hero .tagline {
+  font-size: 1.1rem;
+  color: var(--muted);
+  max-width: 560px;
+  line-height: 1.75;
+  margin-bottom: 36px;
+}
+
+.hero-cta {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 22px;
+  background: var(--teal);
+  color: #070b13;
+  font-weight: 600;
+  font-size: .88rem;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background .15s, transform .1s;
+}
+.btn-primary:hover { background: #5eefc0; color: #070b13; text-decoration: none; transform: translateY(-1px); }
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 22px;
+  border: 1px solid var(--border2);
+  color: var(--muted);
+  font-size: .88rem;
+  font-weight: 500;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all .15s;
+}
+.btn-ghost:hover { color: var(--text); border-color: var(--teal); background: var(--teal-glow); text-decoration: none; }
+
+/* ── CONTENT ── */
+.content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 24px 96px;
+}
+
+/* ── STORY ── */
+.story {
+  margin-bottom: 72px;
+  animation: fade-up .65s ease .15s both;
+}
+
+.story-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.story-block {
+  background: var(--card-bg);
+  padding: 32px 28px;
+}
+
+.story-block:first-child {
+  grid-column: 1 / -1;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+}
+
+.story-block .block-label {
+  font-family: 'DM Mono', monospace;
+  font-size: .7rem;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--dim);
+  margin-bottom: 12px;
+}
+
+.story-block p {
+  color: var(--muted);
+  font-size: .95rem;
+  line-height: 1.75;
+}
+
+.story-block p strong { color: var(--text); font-weight: 600; }
+
+.story-block .big-quote {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.4;
+  letter-spacing: -.5px;
+  margin-bottom: 16px;
+}
+
+.story-block .big-quote em {
+  font-style: italic;
+  color: var(--teal);
+  font-weight: 400;
+}
+
+@media (max-width: 600px) { .story-grid { grid-template-columns: 1fr; } }
+
+/* ── STATS ROW ── */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 72px;
+  animation: fade-up .65s ease .18s both;
+}
+
+.stat-box {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px 16px;
+  text-align: center;
+}
+
+.stat-box .stat-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 1.6rem;
+  font-weight: 500;
+  color: var(--teal);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.stat-box .stat-label {
+  font-size: .75rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+@media (max-width: 600px) { .stats-row { grid-template-columns: 1fr 1fr; } }
+
+/* ── MANIFESTO ── */
+.manifesto {
+  margin-bottom: 72px;
+  animation: fade-up .65s ease .2s both;
+}
+
+.manifesto-header {
+  font-family: 'DM Mono', monospace;
+  font-size: .7rem;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--dim);
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.manifesto-header::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+.belief-list { list-style: none; display: flex; flex-direction: column; gap: 0; }
+
+.belief-item {
+  display: flex;
+  gap: 20px;
+  padding: 22px 0;
+  border-bottom: 1px solid var(--border);
+  align-items: flex-start;
+}
+.belief-item:last-child { border-bottom: none; }
+
+.belief-num {
+  font-family: 'DM Mono', monospace;
+  font-size: .75rem;
+  color: var(--teal);
+  padding-top: 3px;
+  flex-shrink: 0;
+  width: 24px;
+}
+
+.belief-text strong {
+  display: block;
+  color: var(--text);
+  font-weight: 600;
+  font-size: .95rem;
+  margin-bottom: 4px;
+}
+
+.belief-text span {
+  color: var(--muted);
+  font-size: .88rem;
+  line-height: 1.6;
+}
+
+/* ── SOURCES ── */
+.sources-section {
+  margin-bottom: 72px;
+  animation: fade-up .65s ease .25s both;
+}
+
+.sources-section h2 {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -.5px;
+  margin-bottom: 8px;
+}
+
+.sources-section .sub {
+  color: var(--muted);
+  font-size: .9rem;
+  margin-bottom: 28px;
+}
+
+.source-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+}
+
+.source-chip {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: border-color .15s;
+}
+.source-chip:hover { border-color: var(--border2); }
+
+.source-chip .sc-name {
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.source-chip .sc-freq {
+  font-family: 'DM Mono', monospace;
+  font-size: .7rem;
+  color: var(--teal);
+}
+
+/* ── TECH ── */
+.tech-section {
+  margin-bottom: 72px;
+  animation: fade-up .65s ease .3s both;
+}
+
+.section-label {
+  font-family: 'DM Mono', monospace;
+  font-size: .7rem;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--dim);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+.tech-row { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.tech-chip {
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-family: 'DM Mono', monospace;
+  font-size: .75rem;
+  color: var(--muted);
+  background: var(--bg2);
+  transition: border-color .15s, color .15s;
+}
+.tech-chip:hover { border-color: var(--border2); color: var(--text); }
+.tech-chip.primary { border-color: rgba(45,212,160,.3); color: var(--teal); background: rgba(45,212,160,.06); }
+
+/* ── CONTACT ── */
+.contact-section { animation: fade-up .65s ease .35s both; }
+
+.contact-box {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 40px 36px;
+  text-align: center;
+}
+
+.contact-box .contact-title {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: -1px;
+  margin-bottom: 12px;
+}
+
+.contact-box .contact-title em {
+  font-style: italic;
+  color: var(--teal);
+  font-weight: 400;
+}
+
+.contact-box p {
+  color: var(--muted);
+  font-size: .92rem;
+  line-height: 1.7;
+  max-width: 460px;
+  margin: 0 auto 28px;
+}
+
+.contact-links {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.contact-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 20px;
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  font-size: .85rem;
+  font-weight: 500;
+  color: var(--muted);
+  text-decoration: none;
+  transition: all .15s;
+}
+.contact-link:hover { color: var(--text); border-color: var(--teal); background: var(--teal-glow); text-decoration: none; }
+.contact-link.primary { background: var(--teal); color: #070b13; border-color: transparent; font-weight: 600; }
+.contact-link.primary:hover { background: #5eefc0; color: #070b13; }
+
+/* ── FOOTER ── */
+.site-footer {
+  border-top: 1px solid var(--border);
+  padding: 32px 24px;
+  background: var(--bg2);
+}
+
+.footer-inner {
+  max-width: 880px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
+.footer-nav-label {
+  font-size: .7rem;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--dim);
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.footer-links { display: flex; flex-wrap: wrap; gap: 4px 2px; }
+
+.footer-links a {
+  padding: 4px 8px;
+  font-size: .8rem;
+  color: var(--muted);
+  border-radius: 4px;
+  text-decoration: none;
+  transition: color .15s;
+}
+.footer-links a:hover { color: var(--text); text-decoration: none; }
+
+.footer-meta {
+  font-size: .78rem;
+  color: var(--dim);
+  line-height: 1.8;
+  text-align: right;
+}
+.footer-meta a { color: var(--muted); }
+.footer-meta a:hover { color: var(--text); }
+
+@media (max-width: 600px) {
+  .footer-meta { text-align: left; }
+  .site-footer { padding: 28px 16px; }
+  .contact-box { padding: 28px 20px; }
+  .hero { padding: 48px 20px 32px; }
+  .content { padding: 0 20px 64px; }
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <a href="/" class="logo-link">
+    <span class="logo-dot"></span>
+    Sverige Nu
+  </a>
+  <nav class="site-nav" aria-label="Kategorier">
+    <a href="/befolkning">Befolkning</a>
+    <a href="/vader">Väder</a>
+    <a href="/polis">Polis</a>
+    <a href="/brott">Brott</a>
+    <a href="/inkomst">Inkomst</a>
+    <a href="/halsa">Hälsa</a>
+    <a href="/sjukskrivning">Sjukskrivning</a>
+    <a href="/utbildning">Utbildning</a>
+    <a href="/riksdagen">Riksdagen</a>
+    <a href="/val">Val</a>
+    <a href="/trafik">Trafik</a>
+    <a href="/ekonomi">Ekonomi</a>
+    <a href="/brp">BRP</a>
+    <a href="/energi">Energi</a>
+    <a href="/skatt">Skatt</a>
+    <a href="/samband">Samband</a>
+    <a href="/arbetsmarknad">Arbetsmarknad</a>
+    <a href="/domstol">Domstol</a>
+    <a href="/luftkvalitet">Luftkvalitet</a>
+    <a href="/om" class="active">Om</a>
+  </nav>
+</header>
+
+<main>
+  <div class="hero">
+    <div class="hero-eyebrow">Hamed Adeli · Sverige Nu</div>
+    <h1>Svensk öppen data —<br><em>samlad på ett ställe.</em></h1>
+    <p class="tagline">Sverige har enorma mängder offentlig data. SCB, Socialstyrelsen, Riksdagen, Polisen, Trafikverket — men ingen hade byggt en plats där det hänger ihop. Så jag byggde det.</p>
+    <div class="hero-cta">
+      <a href="mailto:spring.boot.7777@gmail.com" class="btn-primary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+        Kontakta mig
+      </a>
+      <a href="https://hadeli.me" target="_blank" rel="noopener" class="btn-ghost">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        Fler projekt
+      </a>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-num">20</div>
+        <div class="stat-label">datakällor synkas dagligen</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">16</div>
+        <div class="stat-label">ämnesområden + 21 länssidor</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">150k+</div>
+        <div class="stat-label">rader data i databasen</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">0 kr</div>
+        <div class="stat-label">kostnad · ingen reklam</div>
+      </div>
+    </div>
+
+    <!-- STORY -->
+    <div class="story">
+      <div class="story-grid">
+        <div class="story-block">
+          <div class="block-label">Bakgrunden</div>
+          <p class="big-quote">Sverige publicerar världsklassig öppen data — men den är <em>utspridd och oteknisk.</em></p>
+          <p>SCB har befolkningsdata sedan 1968. Socialstyrelsen har dödsorsaker sedan 1952. BRÅ har brottsstatistik per kommun i 30 år. Riksdagen livestreamar varje omröstning. Folkhälsomyndigheten har medellivslängd per län. Allt öppet — men utspritt över dussintals API:er och Excel-filer som kräver expertkunskap att använda.</p>
+        </div>
+        <div class="story-block">
+          <div class="block-label">Vad jag ville lösa</div>
+          <p>Jag ville kunna svara på enkla frågor: <strong>Var i Sverige lever folk längst? Vilken kommun har lägst brottslighet? Hur ser förlossningsstatistiken ut per region?</strong> Svaren finns — men att hitta dem tog timmar. Det borde ta sekunder.</p>
+        </div>
+        <div class="story-block">
+          <div class="block-label">Vad det blev</div>
+          <p><strong>Sverige Nu</strong> samlar idag 20 datakällor, synkar dem automatiskt och presenterar dem i ett enhetligt gränssnitt. Från Riksbankens styrränta till Socialstyrelsens tandhälsostatistik per kommun. Allt gratis, utan inloggning, uppdaterat dygnet runt.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- MANIFESTO -->
+    <div class="manifesto">
+      <div class="manifesto-header">Vad jag tror på</div>
+      <ul class="belief-list">
+        <li class="belief-item">
+          <span class="belief-num">01</span>
+          <div class="belief-text">
+            <strong>Offentlig data ska vara offentlig på riktigt</strong>
+            <span>Att data finns i ett API ingen känner till är inte transparens. Transparens är när vanliga medborgare faktiskt kan se, förstå och ifrågasätta den.</span>
+          </div>
+        </li>
+        <li class="belief-item">
+          <span class="belief-num">02</span>
+          <div class="belief-text">
+            <strong>Demokrati förutsätter informerade medborgare</strong>
+            <span>Det är svårt att ha en åsikt om sjukvård, brottslighet eller skola utan tillgång till faktisk data. Sverige Nu försöker sänka den tröskel.</span>
+          </div>
+        </li>
+        <li class="belief-item">
+          <span class="belief-num">03</span>
+          <div class="belief-text">
+            <strong>Tekniken ska vara osynlig</strong>
+            <span>Ingen ska behöva förstå JSON, API-nycklar eller SQL för att läsa valresultat eller luftkvalitet. Det är ingenjörens jobb att göra det enkelt — inte användarens.</span>
+          </div>
+        </li>
+        <li class="belief-item">
+          <span class="belief-num">04</span>
+          <div class="belief-text">
+            <strong>Bygg det som saknas</strong>
+            <span>Vänta inte på att rätt myndighet eller rätt företag ska göra det. Om du ser ett gap och har förmågan — täpp igen det.</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- DATA SOURCES -->
+    <div class="sources-section">
+      <h2>Datakällor</h2>
+      <p class="sub">Alla öppna, alla gratis, alla automatiskt synkade.</p>
+      <div class="source-grid">
+        <div class="source-chip"><span class="sc-name">SMHI</span><span class="sc-freq">var 15:e min · ~232 stationer</span></div>
+        <div class="source-chip"><span class="sc-name">Polisen</span><span class="sc-freq">var 15:e min · händelseflöde</span></div>
+        <div class="source-chip"><span class="sc-name">SCB</span><span class="sc-freq">dagligen · befolkning &amp; inkomst</span></div>
+        <div class="source-chip"><span class="sc-name">Kolada</span><span class="sc-freq">var 12:e tim · 8 KPI:er × 290 kommuner</span></div>
+        <div class="source-chip"><span class="sc-name">Riksdagen</span><span class="sc-freq">dagligen · ledamöter &amp; omröstningar</span></div>
+        <div class="source-chip"><span class="sc-name">Valmyndigheten</span><span class="sc-freq">dagligen · val 2002–2022</span></div>
+        <div class="source-chip"><span class="sc-name">BRÅ</span><span class="sc-freq">veckovis · 87 000 rader brottsdata</span></div>
+        <div class="source-chip"><span class="sc-name">Trafikverket</span><span class="sc-freq">var 15:e min · väg &amp; flöde</span></div>
+        <div class="source-chip"><span class="sc-name">Riksbanken</span><span class="sc-freq">dagligen · styrränta &amp; nyckeltal</span></div>
+        <div class="source-chip"><span class="sc-name">Elprisetjustnu</span><span class="sc-freq">var 15:e min · SE1–SE4 spotpris</span></div>
+        <div class="source-chip"><span class="sc-name">Arbetsförmedlingen</span><span class="sc-freq">var 15:e min · lediga jobb per län</span></div>
+        <div class="source-chip"><span class="sc-name">Folkhälsomyndigheten</span><span class="sc-freq">dagligen · livslängd, rökning, alkohol</span></div>
+        <div class="source-chip"><span class="sc-name">Domstolsverket</span><span class="sc-freq">dagligen · mål &amp; handläggningstider</span></div>
+        <div class="source-chip"><span class="sc-name">Skolverket + Kolada</span><span class="sc-freq">dagligen · skolor, betyg, SALSA</span></div>
+        <div class="source-chip"><span class="sc-name">Open-Meteo CAMS</span><span class="sc-freq">varje timme · luftkvalitet per län</span></div>
+        <div class="source-chip"><span class="sc-name">Socialstyrelsen</span><span class="sc-freq">dagligen · dödsorsaker, tandhälsa, förlossningar</span></div>
+      </div>
+    </div>
+
+    <!-- TECH -->
+    <div class="tech-section">
+      <div class="section-label">Teknik bakom projektet</div>
+      <div class="tech-row">
+        <span class="tech-chip primary">Go</span>
+        <span class="tech-chip primary">PostgreSQL</span>
+        <span class="tech-chip primary">Docker</span>
+        <span class="tech-chip primary">nginx</span>
+        <span class="tech-chip">chi v5</span>
+        <span class="tech-chip">pgx/v5</span>
+        <span class="tech-chip">Chart.js</span>
+        <span class="tech-chip">Vanilla JS</span>
+        <span class="tech-chip">Playwright</span>
+        <span class="tech-chip">Linux</span>
+        <span class="tech-chip">Cloudflare</span>
+        <span class="tech-chip">AWS</span>
+      </div>
+    </div>
+
+    <!-- CONTACT -->
+    <div class="contact-section">
+      <div class="contact-box">
+        <div class="contact-title">Saknar du <em>något?</em></div>
+        <p>Är det en datakälla som borde vara med? En statistik du letar efter men inte hittar? Eller vill du bara diskutera projektet — hör av dig. Jag svarar alltid.</p>
+        <div class="contact-links">
+          <a href="mailto:spring.boot.7777@gmail.com" class="contact-link primary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+            Skicka e-post
+          </a>
+          <a href="https://www.linkedin.com/in/hamed-adeli/" target="_blank" rel="noopener" class="contact-link">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
+            LinkedIn
+          </a>
+          <a href="https://hadeli.me" target="_blank" rel="noopener" class="contact-link">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            hadeli.me
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div>
+      <div class="footer-nav-label">Alla sidor</div>
+      <nav class="footer-links" aria-label="Alla sidor">
+        <a href="/">Hem</a>
+        <a href="/befolkning">Befolkning</a>
+        <a href="/inkomst">Inkomst</a>
+        <a href="/polis">Polis</a>
+        <a href="/vader">Väder</a>
+        <a href="/riksdagen">Riksdagen</a>
+        <a href="/val">Val</a>
+        <a href="/luftkvalitet">Luftkvalitet</a>
+        <a href="/brott">Brott</a>
+        <a href="/trafik">Trafik</a>
+        <a href="/ekonomi">Ekonomi</a>
+    <a href="/brp">BRP</a>
+    <a href="/energi">Energi</a>
+    <a href="/skatt">Skatt</a>
+    <a href="/arbetsmarknad">Arbetsmarknad</a>
+        <a href="/utbildning">Utbildning</a>
+        <a href="/halsa">Hälsa</a>
+    <a href="/sjukskrivning">Sjukskrivning</a>
+        <a href="/domstol">Domstol</a>
+        <a href="/om">Om</a>
+      </nav>
+    </div>
+    <div class="footer-meta">
+      Skapad av <a href="https://hadeli.me" target="_blank" rel="noopener">Hamed Adeli</a>
+      · <a href="https://www.linkedin.com/in/hamed-adeli/" target="_blank" rel="noopener">LinkedIn</a>
+      · © 2026
+    </div>
+  </div>
+</footer>
+
+  <script src="/js/nav.js" defer></script>
+</body>
+</html>

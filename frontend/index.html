@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sverige Nu — Nationell öppen data</title>
+  <!-- SEO -->
+  <meta name="description" content="Utforska öppen statistik om Sverige: befolkning, inkomst, brottslighet, hälsa, riksdag, väder och mycket mer. 15 ämnesområden, daglig uppdatering.">
+  <meta name="robots" content="index, follow">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Sverige Nu">
+  <meta property="og:title" content="Sverige Nu — Öppen data om Sverige">
+  <meta property="og:description" content="Utforska öppen statistik om Sverige: befolkning, inkomst, brottslighet, hälsa, riksdag, väder och mycket mer. 15 ämnesområden, daglig uppdatering.">
+  <meta property="og:url" content="https://sverigenu.se/">
+  <meta property="og:image" content="https://sverigenu.se/og-image.png">
+
+  <!-- Twitter / X -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Sverige Nu — Öppen data om Sverige">
+  <meta name="twitter:description" content="Utforska öppen statistik om Sverige: befolkning, inkomst, brottslighet, hälsa, riksdag, väder och mycket mer. 15 ämnesområden, daglig uppdatering.">
+  <meta name="twitter:image" content="https://sverigenu.se/og-image.png">
+  <meta name="description" content="Realtidsdata om Sverige — väder, befolkning, trafik, polis, riksdag och mer. All data från svenska myndigheters öppna API:er.">  <link rel="stylesheet" href="/fonts/fonts.css">
+  <link rel="stylesheet" href="/css/nav.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #070b13;
+      --bg2:       #0a101c;
+      --card-bg:   #0f1726;
+      --card-hov:  #15203400;
+      --border:    #1b2940;
+      --border2:   #2a3f5f;
+      --text:      #e3ebf5;
+      --muted:     #6b82a0;
+      --dim:       #3d5270;
+      --accent:    #4fa3e8;
+      --accent2:   #79c0ff;
+      --aurora-g:  #2dd4a0;
+      --aurora-b:  #38b6ff;
+      --aurora-v:  #7c6cff;
+      --green:     #3fb950;
+      --amber:     #d29922;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    ::selection { background: rgba(79,163,232,.35); color: #fff; }
+
+    ::-webkit-scrollbar { width: 10px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: #1b2940; border-radius: 5px; border: 2px solid var(--bg); }
+    ::-webkit-scrollbar-thumb:hover { background: #2a3f5f; }
+
+    /* ════ Atmosphere layers ════════════════════════════ */
+    .grain {
+      position: fixed;
+      inset: -50%;
+      width: 200%;
+      height: 200%;
+      z-index: 999;
+      pointer-events: none;
+      opacity: .032;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+      animation: grainShift 1.2s steps(4) infinite;
+    }
+    @keyframes grainShift {
+      0%   { transform: translate(0,0); }
+      25%  { transform: translate(-2%,1%); }
+      50%  { transform: translate(1%,-2%); }
+      75%  { transform: translate(-1%,-1%); }
+      100% { transform: translate(0,0); }
+    }
+
+    .dotgrid {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background-image: radial-gradient(rgba(107,130,160,.13) 1px, transparent 1px);
+      background-size: 28px 28px;
+      mask-image: radial-gradient(ellipse 75% 65% at 32% 42%, black 0%, transparent 70%);
+      -webkit-mask-image: radial-gradient(ellipse 75% 65% at 32% 42%, black 0%, transparent 70%);
+    }
+
+    /* Aurora — northern lights drifting over the north */
+    .aurora {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .aurora i {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(70px);
+      opacity: .14;
+      mix-blend-mode: screen;
+    }
+    .aurora i:nth-child(1) {
+      width: 520px; height: 240px;
+      left: 2%; top: 4%;
+      background: linear-gradient(100deg, var(--aurora-g), transparent 70%);
+      transform: rotate(-18deg);
+      animation: auroraDrift1 14s ease-in-out infinite alternate;
+    }
+    .aurora i:nth-child(2) {
+      width: 420px; height: 200px;
+      left: 16%; top: 12%;
+      background: linear-gradient(80deg, var(--aurora-b), transparent 70%);
+      transform: rotate(-24deg);
+      animation: auroraDrift2 18s ease-in-out infinite alternate;
+    }
+    .aurora i:nth-child(3) {
+      width: 360px; height: 170px;
+      left: 6%; top: 20%;
+      background: linear-gradient(120deg, var(--aurora-v), transparent 65%);
+      transform: rotate(-12deg);
+      animation: auroraDrift3 22s ease-in-out infinite alternate;
+    }
+    @keyframes auroraDrift1 {
+      from { transform: rotate(-18deg) translate(0,0) scaleX(1); opacity: .13; }
+      to   { transform: rotate(-14deg) translate(60px,24px) scaleX(1.2); opacity: .2; }
+    }
+    @keyframes auroraDrift2 {
+      from { transform: rotate(-24deg) translate(0,0); opacity: .11; }
+      to   { transform: rotate(-30deg) translate(-50px,30px) scaleX(1.25); opacity: .18; }
+    }
+    @keyframes auroraDrift3 {
+      from { transform: rotate(-12deg) translate(0,0); opacity: .08; }
+      to   { transform: rotate(-8deg) translate(40px,-20px) scaleX(1.15); opacity: .15; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .aurora i, .grain { animation: none !important; }
+    }
+
+    /* ════ Header ═══════════════════════════════════════ */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(7,11,19,.85);
+      backdrop-filter: blur(14px) saturate(1.4);
+      -webkit-backdrop-filter: blur(14px) saturate(1.4);
+      border-bottom: 1px solid rgba(27,41,64,.7);
+      padding: 0 24px;
+      height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 900;
+      font-size: 1.3rem;
+      color: var(--text);
+      text-decoration: none;
+      letter-spacing: -.02em;
+    }
+    .logo span { color: var(--accent); }
+    .logo sup {
+      font-family: 'DM Mono', monospace;
+      font-weight: 400;
+      font-size: .5rem;
+      color: var(--dim);
+      letter-spacing: .12em;
+      margin-left: 6px;
+      vertical-align: super;
+    }
+
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-family: 'DM Mono', monospace;
+      font-size: .68rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--green);
+      padding: 5px 12px;
+      border: 1px solid rgba(63,185,80,.25);
+      border-radius: 20px;
+      background: rgba(63,185,80,.06);
+    }
+    .live-badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: pulse 2.5s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; box-shadow: 0 0 0 0 rgba(63,185,80,.4); }
+      50%      { opacity: .6; box-shadow: 0 0 0 5px rgba(63,185,80,0); }
+    }
+
+    nav { display: flex; gap: 2px; }
+    nav a {
+      font-size: .82rem;
+      font-weight: 500;
+      color: var(--muted);
+      text-decoration: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      transition: color .15s, background .15s;
+    }
+    nav a:hover { color: var(--text); background: rgba(15,23,38,.9); }
+    @media (max-width: 640px) { nav { display: none; } }
+
+    /* ════ Hero ═════════════════════════════════════════ */
+    .hero-wrap { position: relative; }
+
+    .hero {
+      position: relative;
+      min-height: calc(100vh - 58px);
+      display: grid;
+      grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 40px 28px 80px;
+      align-items: center;
+      gap: 24px;
+    }
+    @media (max-width: 880px) {
+      .hero {
+        grid-template-columns: 1fr;
+        padding: 36px 20px 60px;
+        gap: 44px;
+      }
+    }
+
+    /* ── Map ──────────────────────────────────────────── */
+    .map-wrap {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #sweden-map {
+      width: 100%;
+      max-width: 430px;
+      height: auto;
+      overflow: visible;
+    }
+
+    .lan {
+      stroke: rgba(42,63,95,.9);
+      stroke-width: .7;
+      cursor: pointer;
+      opacity: 0;
+      transform-origin: center;
+      animation: lanIn .55s cubic-bezier(.2,.8,.3,1) both;
+      transition: filter .2s ease, stroke .2s ease;
+    }
+    @keyframes lanIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .lan:hover, .lan.active {
+      stroke: var(--accent2);
+      stroke-width: 1;
+      filter: drop-shadow(0 0 9px rgba(79,163,232,.55));
+    }
+
+    /* map legend */
+    .map-legend {
+      position: absolute;
+      bottom: 4px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'DM Mono', monospace;
+      font-size: .62rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--dim);
+      white-space: nowrap;
+    }
+    .legend-ramp {
+      width: 72px;
+      height: 6px;
+      border-radius: 3px;
+      background: linear-gradient(90deg, #101a2c, #1d4a74);
+      border: 1px solid var(--border);
+    }
+
+    /* ── Map dimension toggle ───────────────────────── */
+    .map-toggle {
+      display: flex; flex-wrap: wrap; gap: 6px;
+      justify-content: center; margin-bottom: 12px;
+    }
+    .map-btn {
+      font-family: 'DM Mono', monospace; font-size: .65rem;
+      letter-spacing: .07em; text-transform: uppercase;
+      color: var(--dim); background: var(--card-bg);
+      border: 1px solid var(--border); border-radius: 20px;
+      padding: 4px 12px; cursor: pointer;
+      transition: color .15s, border-color .15s, background .15s;
+    }
+    .map-btn:hover { color: var(--text); border-color: var(--border2); }
+    .map-btn.active {
+      color: var(--bg); background: var(--accent); border-color: var(--accent);
+    }
+
+    /* ── Info column ─────────────────────────────────── */
+    .info { position: relative; padding-left: 28px; }
+    @media (max-width: 880px) { .info { padding-left: 0; order: -1; } }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'DM Mono', monospace;
+      font-size: .68rem;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 22px;
+    }
+    .eyebrow::before {
+      content: '';
+      width: 28px;
+      height: 1px;
+      background: var(--accent);
+      opacity: .6;
+    }
+
+    h1 {
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 900;
+      font-size: clamp(2.7rem, 5.6vw, 4.3rem);
+      line-height: .98;
+      letter-spacing: -.035em;
+      margin-bottom: 24px;
+      text-wrap: balance;
+    }
+    h1 em {
+      font-style: italic;
+      font-weight: 700;
+      background: linear-gradient(105deg, var(--aurora-b) 10%, var(--aurora-g) 55%, var(--aurora-v) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      padding-right: .06em;
+    }
+
+    .lead {
+      font-size: 1.02rem;
+      line-height: 1.7;
+      color: var(--muted);
+      max-width: 470px;
+      margin-bottom: 40px;
+    }
+    .lead strong { color: var(--text); font-weight: 500; }
+
+    /* reveal choreography */
+    .rv { opacity: 0; animation: rvIn .7s cubic-bezier(.2,.8,.3,1) both; }
+    .rv-1 { animation-delay: .08s; }
+    .rv-2 { animation-delay: .18s; }
+    .rv-3 { animation-delay: .3s; }
+    .rv-4 { animation-delay: .44s; }
+    .rv-5 { animation-delay: .58s; }
+    @keyframes rvIn {
+      from { opacity: 0; transform: translateY(22px); filter: blur(3px); }
+      to   { opacity: 1; transform: translateY(0); filter: blur(0); }
+    }
+
+    /* ── Stats ───────────────────────────────────────── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 36px;
+    }
+    @media (max-width: 560px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+
+    .stat-card {
+      background: var(--card-bg);
+      padding: 18px 18px 15px;
+      position: relative;
+      transition: background .2s;
+    }
+    .stat-card:hover { background: #131d30; }
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), transparent);
+      opacity: 0;
+      transition: opacity .2s;
+    }
+    .stat-card:hover::after { opacity: .8; }
+
+    .stat-num {
+      font-family: 'DM Mono', monospace;
+      font-size: clamp(1.4rem, 2.2vw, 1.7rem);
+      font-weight: 500;
+      color: var(--text);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+    .stat-num .unit { color: var(--accent); font-size: .75em; }
+    .stat-label {
+      font-size: .68rem;
+      font-weight: 600;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+      color: var(--dim);
+      margin-top: 7px;
+    }
+
+    /* ── Source chips ────────────────────────────────── */
+    .sources-label {
+      font-family: 'DM Mono', monospace;
+      font-size: .64rem;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--dim);
+      margin-bottom: 12px;
+    }
+    .chips { display: flex; flex-wrap: wrap; gap: 7px; }
+    .chip {
+      font-size: .72rem;
+      font-weight: 500;
+      color: var(--muted);
+      background: rgba(15,23,38,.7);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 5px 11px;
+      transition: color .15s, border-color .15s, transform .15s;
+      cursor: default;
+    }
+    .chip:hover {
+      color: var(--accent2);
+      border-color: rgba(79,163,232,.4);
+      transform: translateY(-1px);
+    }
+
+    /* ── Tooltip ─────────────────────────────────────── */
+    #tooltip {
+      position: fixed;
+      pointer-events: none;
+      z-index: 200;
+      opacity: 0;
+      transform: translateY(6px) scale(.97);
+      transition: opacity .14s ease, transform .14s cubic-bezier(.2,.8,.3,1);
+      min-width: 196px;
+    }
+    #tooltip.visible { opacity: 1; transform: translateY(0) scale(1); }
+    .tooltip-inner {
+      background: linear-gradient(160deg, #15203400, #0f1726 45%), #0f1726;
+      border: 1px solid var(--border2);
+      border-radius: 12px;
+      padding: 14px 16px 12px;
+      box-shadow: 0 16px 48px rgba(0,0,0,.6), 0 0 0 1px rgba(79,163,232,.08), inset 0 1px 0 rgba(121,192,255,.07);
+    }
+    .tooltip-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .tooltip-name {
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 700;
+      font-size: 1.02rem;
+      line-height: 1.15;
+    }
+    .tooltip-code {
+      font-family: 'DM Mono', monospace;
+      font-size: .62rem;
+      letter-spacing: .1em;
+      color: var(--accent);
+      border: 1px solid rgba(79,163,232,.3);
+      border-radius: 4px;
+      padding: 1px 5px;
+      text-transform: uppercase;
+    }
+    .tooltip-pop {
+      font-family: 'DM Mono', monospace;
+      font-size: .78rem;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+    .tooltip-bar {
+      height: 3px;
+      background: #1b2940;
+      border-radius: 2px;
+      margin-top: 10px;
+      overflow: hidden;
+    }
+    .tooltip-bar i {
+      display: block;
+      height: 100%;
+      border-radius: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--aurora-g));
+      transition: width .25s cubic-bezier(.2,.8,.3,1);
+    }
+    .tooltip-cta {
+      font-size: .72rem;
+      font-weight: 500;
+      color: var(--accent);
+      margin-top: 9px;
+      opacity: .85;
+    }
+    .tooltip-touch-hint {
+      font-size: .65rem;
+      color: var(--dim);
+      margin-top: 4px;
+      letter-spacing: .03em;
+    }
+    .tooltip-touch-hint[hidden] { display: none; }
+    .tooltip-live {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .tooltip-live[hidden] { display: none; }
+    .tt-live-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'DM Mono', monospace;
+      font-size: .72rem;
+      color: var(--text);
+    }
+    .tt-live-row .lbl { color: var(--dim); font-size: .62rem; letter-spacing: .08em; text-transform: uppercase; }
+    .tt-live-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      flex: none;
+    }
+    .tt-live-dot.temp { background: var(--aurora-g); box-shadow: 0 0 6px var(--aurora-g); }
+    .tt-live-dot.pol  { background: #f78166; box-shadow: 0 0 6px #f78166; }
+
+    /* ── Scroll hint ─────────────────────────────────── */
+    .scroll-hint {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 7px;
+      color: var(--dim);
+      font-family: 'DM Mono', monospace;
+      font-size: .62rem;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      animation: rvIn 1s 1.4s both;
+    }
+    .scroll-line {
+      width: 1px;
+      height: 32px;
+      background: linear-gradient(180deg, var(--dim), transparent);
+      position: relative;
+      overflow: hidden;
+    }
+    .scroll-line::after {
+      content: '';
+      position: absolute;
+      top: -10px; left: 0;
+      width: 1px; height: 10px;
+      background: var(--accent2);
+      animation: scrollDrop 2s ease-in infinite;
+    }
+    @keyframes scrollDrop {
+      to { top: 42px; }
+    }
+
+    /* ════ Ticker ═══════════════════════════════════════ */
+    .ticker-strip {
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg2);
+      overflow: hidden;
+      padding: 11px 0;
+      position: relative;
+    }
+    .ticker-strip::before, .ticker-strip::after {
+      content: '';
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 80px;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .ticker-strip::before { left: 0;  background: linear-gradient(90deg, var(--bg2), transparent); }
+    .ticker-strip::after  { right: 0; background: linear-gradient(-90deg, var(--bg2), transparent); }
+    .ticker {
+      display: flex;
+      gap: 48px;
+      width: max-content;
+      animation: tick 38s linear infinite;
+    }
+    .ticker-strip:hover .ticker { animation-play-state: paused; }
+    @keyframes tick { to { transform: translateX(-50%); } }
+    .tick-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      font-family: 'DM Mono', monospace;
+      font-size: .7rem;
+      letter-spacing: .06em;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .tick-item b { color: var(--text); font-weight: 500; }
+    .tick-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--green);
+      flex: none;
+    }
+    .tick-dot.amber { background: var(--amber); }
+
+    /* ════ Cards section ════════════════════════════════ */
+    .section {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 72px 28px 96px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 36px;
+    }
+    .section-title {
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 700;
+      font-size: clamp(1.6rem, 3vw, 2.1rem);
+      letter-spacing: -.02em;
+    }
+    .section-title em {
+      font-style: italic;
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .section-sub {
+      font-family: 'DM Mono', monospace;
+      font-size: .68rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--dim);
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      --ac: 79,163,232;
+      position: relative;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity .6s cubic-bezier(.2,.8,.3,1), transform .6s cubic-bezier(.2,.8,.3,1),
+                  border-color .25s, box-shadow .25s;
+    }
+    .card.in { opacity: 1; transform: translateY(0); }
+    .card:hover {
+      border-color: rgba(var(--ac), .45);
+      box-shadow: 0 18px 50px -18px rgba(var(--ac), .28), inset 0 1px 0 rgba(var(--ac), .12);
+    }
+    /* cursor-tracking glow */
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 0%), rgba(var(--ac), .1), transparent 65%);
+      opacity: 0;
+      transition: opacity .25s;
+      pointer-events: none;
+    }
+    .card:hover::before { opacity: 1; }
+
+    .card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .card-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(var(--ac), .1);
+      color: rgb(var(--ac));
+      border: 1px solid rgba(var(--ac), .18);
+    }
+    .card-label {
+      font-family: 'DM Mono', monospace;
+      font-size: .6rem;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+      color: var(--dim);
+    }
+    .card-title {
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 700;
+      font-size: 1.2rem;
+      letter-spacing: -.01em;
+      margin-bottom: 7px;
+    }
+    .card-desc {
+      font-size: .82rem;
+      color: var(--muted);
+      line-height: 1.55;
+      margin-bottom: 14px;
+    }
+    .card-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .card-soon {
+      font-family: 'DM Mono', monospace;
+      font-size: .6rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--amber);
+      background: rgba(210,153,34,.08);
+      border: 1px solid rgba(210,153,34,.2);
+      border-radius: 5px;
+      padding: 3px 8px;
+    }
+    .card-live {
+      font-family: 'DM Mono', monospace;
+      font-size: .6rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--green);
+      background: rgba(63,185,80,.08);
+      border: 1px solid rgba(63,185,80,.25);
+      border-radius: 5px;
+      padding: 3px 8px;
+    }
+    .card-live-dot {
+      display: inline-block; width: 5px; height: 5px; border-radius: 50%;
+      background: var(--green); margin-right: 5px; vertical-align: middle;
+      animation: ldpulse 2.5s ease-in-out infinite;
+    }
+    @keyframes ldpulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+    .card-arrow {
+      color: rgb(var(--ac));
+      opacity: 0;
+      transform: translateX(-6px);
+      transition: opacity .2s, transform .25s cubic-bezier(.2,.8,.3,1);
+    }
+    .card:hover .card-arrow { opacity: 1; transform: translateX(0); }
+
+    /* ════ Footer ═══════════════════════════════════════ */
+    footer {
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      padding: 40px 28px;
+      position: relative;
+      overflow: hidden;
+    }
+    footer::before {
+      content: 'SVERIGE';
+      position: absolute;
+      bottom: -42px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 900;
+      font-size: clamp(5rem, 16vw, 11rem);
+      letter-spacing: .02em;
+      color: rgba(27,41,64,.35);
+      pointer-events: none;
+      white-space: nowrap;
+      line-height: 1;
+    }
+    .footer-inner {
+      position: relative;
+      max-width: 1240px;
+      margin: 0 auto;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .footer-logo {
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 900;
+      font-size: 1.02rem;
+      color: var(--muted);
+    }
+    .footer-logo span { color: var(--accent); }
+    .footer-text {
+      font-size: .78rem;
+      color: var(--dim);
+      line-height: 1.7;
+      text-align: right;
+    }
+    .footer-text a { color: var(--muted); text-decoration: none; }
+    .footer-text a:hover { color: var(--accent); }
+    @media (max-width: 560px) { .footer-text { text-align: left; } }
+  </style>
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+
+<header>
+  <a href="/" class="logo">Sverige<span>Nu</span><sup>BETA</sup></a>
+  <nav>
+    <a href="/befolkning">Befolkning</a>
+    <a href="/inkomst">Inkomst</a>
+    <a href="/polis">Polis</a>
+    <a href="/brott">Brott</a>
+    <a href="/halsa">Hälsa</a>
+    <a href="/sjukskrivning">Sjukskrivning</a>
+    <a href="/domstol">Domstol</a>
+    <a href="/riksdagen">Riksdagen</a>
+    <a href="/val">Val</a>
+    <a href="/vader">Väder</a>
+    <a href="/trafik">Trafik</a>
+    <a href="/ekonomi">Ekonomi</a>
+    <a href="/brp">BRP</a>
+    <a href="/energi">Energi</a>
+    <a href="/skatt">Skatt</a>
+    <a href="/samband">Samband</a>
+    <a href="/arbetsmarknad">Arbetsmarknad</a>
+    <a href="/utbildning">Utbildning</a>
+    <a href="/om">Om</a>
+  </nav>
+  <span class="live-badge">Live</span>
+</header>
+
+<div class="hero-wrap">
+  <div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
+  <div class="dotgrid" aria-hidden="true"></div>
+
+  <section class="hero">
+
+    <!-- Map -->
+    <div class="map-toggle" id="mapToggle">
+      <button class="map-btn active" data-dim="population">Befolkning</button>
+      <button class="map-btn" data-dim="income">Inkomst</button>
+      <button class="map-btn" data-dim="crime">Brott</button>
+      <button class="map-btn" data-dim="education">Utbildning</button>
+      <button class="map-btn" data-dim="health">Hälsa</button>
+      <button class="map-btn" data-dim="politics">Politik</button>
+    </div>
+    <div class="map-wrap">
+      <svg id="sweden-map" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 820" aria-label="Karta över Sveriges 21 län">
+        <path id="lan-x"  class="lan" data-name="Gävleborg"       data-pop="285 000"   d="M240.7,500.2L235.7,495.9L237.4,491.1L236.0,484.4L232.9,481.5L233.6,470.7L234.8,465.0L231.6,460.8L234.4,458.5L230.9,455.6L233.6,450.5L230.2,445.7L230.7,441.9L240.2,437.7L243.2,442.1L245.9,438.1L241.5,437.0L239.3,430.8L239.5,425.4L244.0,417.4L245.1,412.5L234.7,410.7L227.6,410.6L208.8,406.5L198.9,406.0L178.0,400.6L174.5,400.9L168.4,404.8L171.8,411.8L170.5,414.3L160.0,421.0L160.0,429.5L149.7,430.2L144.2,428.5L141.2,431.8L136.9,444.5L143.6,446.1L145.2,450.2L159.2,450.2L162.2,447.2L171.7,458.6L178.3,464.4L180.7,471.2L184.2,474.9L188.4,476.8L197.0,478.6L200.7,484.9L205.8,490.4L205.5,492.9L198.6,502.7L205.7,512.0L210.8,515.5L217.1,523.7L220.4,524.0L226.5,519.0L231.5,519.7L235.3,518.3L235.0,514.0L238.5,508.1L240.7,500.2Z"/>
+        <path id="lan-f"  class="lan" data-name="Jönköping"        data-pop="375 000"   d="M175.3,696.6L173.3,691.4L174.4,683.4L178.1,682.2L179.2,679.4L177.6,676.2L179.3,674.1L171.4,667.8L162.6,667.1L161.0,666.2L156.4,656.2L159.1,650.7L155.3,642.3L149.6,645.8L141.1,644.8L137.1,642.4L135.0,638.3L128.2,651.1L127.3,656.1L121.3,659.0L110.7,659.7L111.3,663.8L109.8,667.3L108.3,676.2L103.3,683.7L98.6,688.3L95.1,690.5L88.0,699.7L87.0,702.4L88.8,706.4L92.4,703.2L98.0,701.8L105.1,704.9L105.6,707.5L108.7,709.7L111.8,706.7L115.1,708.5L117.9,706.5L122.0,705.9L125.4,707.9L128.0,713.5L131.7,714.9L133.8,711.3L132.4,707.5L133.4,700.6L145.4,696.1L148.7,695.7L153.8,700.0L161.8,697.4L163.9,695.3L170.4,695.2L175.3,696.6Z"/>
+        <path id="lan-h"  class="lan" data-name="Kalmar"           data-pop="250 000"   d="M229.8,689.0L226.0,691.2L225.7,695.5L224.0,697.1L223.2,702.0L217.1,715.0L213.6,716.1L205.7,735.0L206.2,753.1L209.0,752.5L211.7,746.4L214.4,733.6L219.4,719.7L221.1,718.8L223.0,713.6L222.6,710.5L224.8,707.8L226.3,702.8L229.6,695.7L228.7,693.2L229.8,689.0ZM216.0,651.8L212.7,646.7L207.1,644.0L202.2,644.1L197.6,647.0L192.8,646.6L194.1,652.6L192.9,659.1L188.9,661.6L183.0,659.4L178.2,660.1L171.4,667.8L179.3,674.1L177.6,676.2L179.2,679.4L178.1,682.2L174.4,683.4L173.3,691.4L176.7,699.8L179.6,701.3L184.4,707.6L185.9,711.2L183.6,714.1L174.5,714.3L175.6,718.9L169.6,722.7L170.5,727.3L170.0,734.2L168.5,738.6L176.9,737.5L184.2,744.7L190.6,747.5L193.7,747.0L194.8,742.2L199.0,734.8L200.5,728.9L205.0,727.4L204.1,722.7L206.0,719.8L208.1,711.7L207.1,708.0L210.5,705.8L211.2,702.4L208.0,698.6L208.8,691.8L210.5,688.0L214.9,685.2L216.1,681.6L213.9,676.7L213.2,669.5L216.7,669.1L215.6,664.8L207.9,657.3L212.5,654.9L216.8,657.5L219.1,655.6L216.0,651.8Z"/>
+        <path id="lan-w"  class="lan" data-name="Dalarna"          data-pop="290 000"   d="M136.9,444.5L130.3,444.0L105.6,440.6L95.5,426.4L97.5,420.7L94.0,418.3L90.5,418.5L85.6,416.3L76.5,409.1L59.3,405.3L59.4,407.5L53.8,436.8L62.9,445.0L70.0,447.1L79.4,457.2L77.4,466.7L74.7,469.8L73.5,475.3L75.1,478.5L87.3,489.1L90.8,495.0L93.2,496.8L102.7,510.4L107.8,512.7L114.1,521.0L125.3,522.9L128.9,529.9L135.8,534.0L145.4,535.1L147.2,530.4L151.3,531.0L164.1,535.2L171.8,542.8L174.7,537.7L180.0,537.9L182.4,527.6L184.7,525.8L190.5,525.2L196.1,526.7L197.4,530.1L202.8,531.6L208.3,529.7L211.2,526.0L217.1,523.7L210.8,515.5L205.7,512.0L198.6,502.7L205.5,492.9L205.8,490.4L200.7,484.9L197.0,478.6L188.4,476.8L184.2,474.9L180.7,471.2L178.3,464.4L171.7,458.6L162.2,447.2L159.2,450.2L145.2,450.2L143.6,446.1L136.9,444.5Z"/>
+        <path id="lan-g"  class="lan" data-name="Kronoberg"        data-pop="205 000"   d="M175.3,696.6L170.4,695.2L163.9,695.3L161.8,697.4L153.8,700.0L148.7,695.7L145.4,696.1L133.4,700.6L132.4,707.5L133.8,711.3L131.7,714.9L128.0,713.5L125.4,707.9L122.0,705.9L117.9,706.5L115.1,708.5L111.8,706.7L108.7,709.7L106.1,714.1L96.4,716.4L95.3,718.4L94.9,725.9L99.9,734.1L100.0,738.0L101.8,741.9L104.5,741.9L119.4,738.7L123.1,735.2L129.6,736.2L139.0,738.8L145.7,743.2L152.5,744.3L155.4,740.6L159.2,739.7L163.2,740.8L167.8,739.3L168.7,735.7L170.0,734.2L170.5,727.3L169.6,722.7L175.6,718.9L174.5,714.3L183.6,714.1L185.9,711.2L184.4,707.6L179.6,701.3L176.7,699.8L175.3,696.6Z"/>
+        <path id="lan-t"  class="lan" data-name="Örebro"           data-pop="310 000"   d="M171.8,542.8L164.1,535.2L151.3,531.0L147.2,530.4L145.4,535.1L135.8,534.0L136.0,536.0L132.3,538.4L134.7,540.4L135.6,554.1L136.9,560.1L136.5,565.0L131.5,576.4L130.9,592.7L134.4,602.6L138.3,609.3L144.6,609.0L148.8,614.1L155.9,611.0L161.6,604.7L165.5,602.6L170.9,602.5L174.9,600.9L177.9,595.6L178.5,591.6L181.1,588.2L184.3,586.6L184.4,585.7L183.2,582.3L183.4,581.8L178.2,576.8L178.6,570.1L182.5,568.3L178.5,557.5L175.5,556.9L176.3,551.0L171.8,542.8Z"/>
+        <path id="lan-e"  class="lan" data-name="Östergötland"     data-pop="475 000"   d="M219.4,614.7L214.0,611.6L207.6,611.4L202.0,603.8L194.2,598.0L185.9,593.1L181.5,594.5L177.9,595.6L174.9,600.9L170.9,602.5L165.5,602.6L161.6,604.7L155.9,611.0L148.8,614.1L135.0,638.3L137.1,642.4L141.1,644.8L149.6,645.8L155.3,642.3L159.1,650.7L156.4,656.2L161.0,666.2L162.6,667.1L171.4,667.8L178.2,660.1L183.0,659.4L188.9,661.6L192.9,659.1L194.1,652.6L192.8,646.6L197.6,647.0L202.2,644.1L207.1,644.0L212.7,646.7L216.0,651.8L220.8,639.3L217.5,635.8L219.3,632.5L217.2,626.1L222.4,623.4L219.5,618.2L214.2,615.1L206.0,616.9L199.7,612.7L219.4,614.7Z"/>
+        <path id="lan-d"  class="lan" data-name="Södermanland"     data-pop="305 000"   d="M226.0,563.0L221.8,564.3L201.7,567.5L201.3,572.1L191.5,573.0L187.8,579.7L183.2,582.3L184.3,586.6L181.1,588.2L178.5,591.6L181.5,594.5L185.9,593.1L194.2,598.0L202.0,603.8L207.6,611.4L214.0,611.6L219.4,614.7L224.5,615.2L230.5,613.2L233.0,609.1L237.1,609.2L243.7,605.7L249.7,598.4L248.2,595.7L241.0,593.8L237.4,580.6L239.5,575.0L243.1,571.5L236.0,564.9L232.5,563.3L226.0,563.0Z"/>
+        <path id="lan-u"  class="lan" data-name="Västmanland"      data-pop="280 000"   d="M183.4,581.8L187.8,579.7L191.5,573.0L201.3,572.1L201.7,567.5L221.8,564.3L226.0,563.0L223.6,555.2L219.9,548.5L222.2,542.8L229.0,545.4L233.7,542.7L234.8,533.7L237.5,532.7L241.0,524.5L240.5,521.7L235.3,518.3L231.5,519.7L226.5,519.0L220.4,524.0L217.1,523.7L211.2,526.0L208.3,529.7L202.8,531.6L197.4,530.1L196.1,526.7L190.5,525.2L184.7,525.8L182.4,527.6L180.0,537.9L174.7,537.7L171.8,542.8L176.3,551.0L175.5,556.9L178.5,557.5L182.5,568.3L178.6,570.1L178.2,576.8L183.4,581.8Z"/>
+        <path id="lan-n"  class="lan" data-name="Halland"          data-pop="345 000"   d="M88.0,699.7L82.1,697.3L81.8,692.8L74.8,691.4L69.3,688.6L66.4,691.6L63.5,691.2L62.1,686.7L62.9,683.7L60.0,680.5L58.8,673.3L50.5,675.8L44.8,675.2L46.0,680.6L44.9,685.6L50.1,682.4L51.9,686.1L55.3,700.3L57.7,706.3L59.9,707.6L61.4,713.8L64.8,715.0L69.4,719.1L70.0,723.2L74.2,729.1L79.2,728.9L81.5,734.8L80.6,739.0L83.0,740.8L84.4,745.0L92.1,746.6L97.8,742.2L101.8,741.9L100.0,738.0L99.9,734.1L94.9,725.9L95.3,718.4L96.4,716.4L106.1,714.1L108.7,709.7L105.6,707.5L105.1,704.9L98.0,701.8L92.4,703.2L88.8,706.4L87.0,702.4L88.0,699.7Z"/>
+        <path id="lan-s"  class="lan" data-name="Värmland"         data-pop="285 000"   d="M135.8,534.0L128.9,529.9L125.3,522.9L114.1,521.0L107.8,512.7L102.7,510.4L93.2,496.8L90.8,495.0L87.3,489.1L75.1,478.5L73.5,475.3L66.3,475.7L58.0,477.7L57.1,479.6L59.2,484.2L61.5,492.7L65.3,498.3L69.3,506.5L69.3,513.4L65.4,519.1L66.7,524.7L66.3,529.3L64.0,533.2L58.4,538.5L53.1,541.9L45.9,541.7L42.6,543.4L44.5,549.3L44.1,553.0L41.8,555.7L37.0,557.8L36.4,561.5L40.2,572.9L41.2,579.3L46.2,579.5L50.5,582.1L54.6,579.0L57.2,581.3L69.3,586.5L71.8,583.6L75.1,585.8L76.1,590.7L78.8,594.3L81.2,604.3L94.1,608.5L99.8,607.5L97.4,602.7L100.2,595.5L105.8,590.5L127.8,591.1L130.9,592.7L131.5,576.4L136.5,565.0L136.9,560.1L135.6,554.1L134.7,540.4L132.3,538.4L136.0,536.0L135.8,534.0Z"/>
+        <path id="lan-z"  class="lan" data-name="Jämtland"         data-pop="130 000"   d="M136.9,444.5L141.2,431.8L144.2,428.5L149.7,430.2L160.0,429.5L160.0,421.0L170.5,414.3L171.8,411.8L168.4,404.8L162.5,405.2L157.9,403.9L150.2,396.5L150.9,393.2L149.2,387.3L155.3,385.8L161.7,386.3L177.3,383.4L187.3,380.1L202.6,379.3L207.2,375.7L215.0,367.9L226.1,363.8L197.9,341.7L192.1,336.8L189.1,325.2L197.2,323.0L200.8,323.6L208.8,322.7L212.6,321.0L214.0,314.4L218.1,304.9L200.8,291.2L194.4,290.7L190.8,285.5L183.7,281.3L182.2,276.7L178.4,278.7L174.6,274.7L166.0,268.8L165.2,264.3L159.5,262.3L156.3,257.3L151.4,255.3L145.1,248.3L131.9,241.8L131.6,241.7L106.9,272.3L123.8,280.5L125.5,294.1L125.0,296.1L119.0,304.8L117.5,305.3L92.2,300.6L83.2,302.5L72.4,308.4L58.5,325.6L54.1,329.0L55.3,337.3L47.7,346.8L56.0,363.3L51.7,367.8L53.6,378.8L51.2,387.2L58.2,401.7L59.3,405.3L76.5,409.1L85.6,416.3L90.5,418.5L94.0,418.3L97.5,420.7L95.5,426.4L105.6,440.6L130.3,444.0L136.9,444.5Z"/>
+        <path id="lan-bd" class="lan" data-name="Norrbotten"       data-pop="250 000"   d="M391.5,244.4L392.8,239.8L389.9,235.0L395.8,231.9L388.1,225.7L404.4,224.6L407.6,221.4L402.9,219.5L412.5,216.5L420.2,212.2L415.7,210.0L419.4,204.5L418.1,200.1L423.3,199.8L426.9,202.5L436.5,201.8L443.9,204.5L445.4,206.4L455.7,201.0L476.6,202.9L483.2,202.0L484.0,199.9L480.1,193.8L478.8,187.9L474.2,181.5L468.3,178.9L466.2,173.2L465.3,165.7L466.6,163.5L473.9,158.3L474.3,147.5L478.2,144.0L475.8,139.6L466.8,130.4L463.1,124.4L464.6,117.7L468.7,116.5L469.7,109.0L457.8,105.3L462.1,99.4L459.7,90.8L460.2,82.4L466.0,79.5L456.0,72.7L454.2,68.3L447.7,68.2L447.9,63.1L444.2,58.5L428.2,51.2L417.3,48.2L409.0,48.2L403.6,42.9L387.2,36.1L373.2,25.6L367.2,24.2L368.3,20.0L357.1,16.0L338.4,16.8L347.0,23.3L347.5,29.3L343.2,37.7L340.2,40.7L333.4,44.5L343.6,48.2L335.1,54.7L332.3,55.5L316.2,51.2L300.3,46.5L286.2,46.8L278.7,42.6L269.2,44.8L267.9,52.9L269.8,64.2L269.0,66.5L261.3,76.2L259.3,77.4L238.7,69.6L235.1,73.3L220.3,80.8L218.7,82.7L213.2,95.9L208.7,101.1L204.5,103.2L198.5,104.0L195.9,108.9L207.1,121.7L206.3,130.2L192.8,139.7L179.5,156.3L170.8,162.5L172.6,170.3L186.5,174.9L209.2,186.4L223.0,190.4L244.1,204.8L255.2,210.5L268.9,214.8L275.9,219.8L283.2,222.8L288.2,222.9L292.5,226.8L307.2,233.2L307.9,236.0L313.4,239.0L321.4,236.3L324.1,233.9L338.9,230.4L380.1,238.9L391.5,244.4Z"/>
+        <path id="lan-y"  class="lan" data-name="Västernorrland"   data-pop="240 000"   d="M310.2,337.1L306.3,329.2L297.3,319.1L287.3,315.5L281.7,314.4L276.0,306.9L253.4,312.2L223.7,308.2L218.1,304.9L214.0,314.4L212.6,321.0L208.8,322.7L200.8,323.6L197.2,323.0L189.1,325.2L192.1,336.8L197.9,341.7L226.1,363.8L215.0,367.9L207.2,375.7L202.6,379.3L187.3,380.1L177.3,383.4L161.7,386.3L155.3,385.8L149.2,387.3L150.9,393.2L150.2,396.5L157.9,403.9L162.5,405.2L168.4,404.8L174.5,400.9L178.0,400.6L198.9,406.0L208.8,406.5L227.6,410.6L234.7,410.7L245.1,412.5L246.8,406.7L241.3,402.1L239.6,397.8L239.4,392.3L242.9,390.1L247.9,395.6L252.1,392.3L258.1,392.2L259.8,389.4L264.6,386.9L262.2,383.2L263.2,380.2L257.6,368.0L260.2,368.3L260.4,373.7L265.0,371.9L268.3,373.7L272.7,370.1L277.4,372.6L281.4,368.9L281.9,363.9L279.8,362.1L285.0,353.1L290.1,354.4L295.8,351.2L300.1,353.0L304.5,345.1L308.6,343.7L310.2,337.1Z"/>
+        <path id="lan-ac" class="lan" data-name="Västerbotten"     data-pop="275 000"   d="M391.5,244.4L380.1,238.9L338.9,230.4L324.1,233.9L321.4,236.3L313.4,239.0L307.9,236.0L307.2,233.2L292.5,226.8L288.2,222.9L283.2,222.8L275.9,219.8L268.9,214.8L255.2,210.5L244.1,204.8L223.0,190.4L209.2,186.4L186.5,174.9L172.6,170.3L172.8,174.9L157.4,181.9L139.0,183.5L142.8,199.8L142.5,203.4L139.8,208.0L138.0,221.6L138.1,230.0L132.8,235.9L131.8,241.2L131.9,241.8L145.1,248.3L151.4,255.3L156.3,257.3L159.5,262.3L165.2,264.3L166.0,268.8L174.6,274.7L178.4,278.7L182.2,276.7L183.7,281.3L190.8,285.5L194.4,290.7L200.8,291.2L218.1,304.9L223.7,308.2L253.4,312.2L276.0,306.9L281.7,314.4L287.3,315.5L297.3,319.1L306.3,329.2L310.2,337.1L315.2,334.1L319.6,333.4L323.5,338.6L326.6,336.7L325.9,333.3L330.4,329.0L337.4,325.1L345.8,325.8L346.1,320.8L349.8,319.7L352.8,316.1L359.4,317.5L366.9,306.8L369.4,297.3L374.8,293.1L379.3,288.2L387.0,284.5L392.3,279.8L388.2,277.8L387.2,274.3L384.0,270.9L379.4,270.1L381.8,265.6L378.8,262.8L377.1,257.8L379.8,250.8L384.1,250.6L387.3,245.1L391.5,244.4Z"/>
+        <path id="lan-i"  class="lan" data-name="Gotland"          data-pop="61 000"    d="M291.2,660.4L289.7,655.9L286.6,656.9L284.4,660.9L279.7,662.5L274.7,670.1L268.8,675.5L267.1,679.4L269.5,686.9L266.6,693.9L268.8,695.5L271.2,701.1L270.4,713.7L275.9,709.4L275.4,704.0L278.5,699.9L284.3,696.2L288.7,694.8L287.0,691.7L290.7,687.8L296.4,685.5L295.6,683.5L291.4,682.9L290.4,679.6L292.1,673.8L290.5,672.7L292.1,667.9L296.8,666.8L297.4,663.6L302.0,661.2L298.8,656.3L295.2,657.1L291.2,660.4ZM306.9,651.8L302.0,653.0L300.2,656.7L303.6,659.7L306.9,651.8Z"/>
+        <path id="lan-ab" class="lan" data-name="Stockholm"        data-pop="2 425 000" d="M248.2,595.7L249.8,592.6L254.5,591.5L254.1,598.0L260.6,598.8L264.6,590.2L277.1,583.5L273.1,578.6L276.1,576.0L285.3,575.9L285.0,572.1L280.4,568.7L280.3,573.6L274.5,572.0L269.3,574.9L264.6,570.8L268.3,568.1L273.0,569.3L287.7,558.8L291.1,553.3L295.4,551.4L300.2,551.7L302.0,549.2L293.9,547.4L296.2,544.6L301.3,545.7L301.5,542.1L295.4,539.1L292.6,532.2L286.4,527.6L282.9,529.1L279.6,533.6L277.0,542.9L268.6,546.9L266.3,550.3L263.4,550.4L255.2,553.8L251.3,552.8L248.1,555.3L248.5,560.3L245.9,567.6L243.1,571.5L239.5,575.0L237.4,580.6L241.0,593.8L248.2,595.7Z"/>
+        <path id="lan-c"  class="lan" data-name="Uppsala"          data-pop="420 000"   d="M282.9,529.1L278.1,525.0L277.4,521.2L278.4,516.0L273.0,516.0L266.6,509.3L261.9,506.2L260.1,501.6L256.5,502.4L250.1,506.4L247.8,498.8L240.7,500.2L238.5,508.1L235.0,514.0L235.3,518.3L240.5,521.7L241.0,524.5L237.5,532.7L234.8,533.7L233.7,542.7L229.0,545.4L222.2,542.8L219.9,548.5L223.6,555.2L226.0,563.0L232.5,563.3L236.0,564.9L243.1,571.5L245.9,567.6L248.5,560.3L248.1,555.3L251.3,552.8L255.2,553.8L263.4,550.4L266.3,550.3L268.6,546.9L277.0,542.9L279.6,533.6L282.9,529.1Z"/>
+        <path id="lan-k"  class="lan" data-name="Blekinge"         data-pop="160 000"   d="M193.7,747.0L190.6,747.5L184.2,744.7L176.9,737.5L168.5,738.6L167.8,739.3L164.4,739.4L163.2,740.8L159.2,739.7L155.4,740.6L152.5,744.3L145.7,743.2L139.0,738.8L134.5,746.4L135.8,751.1L139.1,752.6L140.7,757.4L139.5,763.2L141.6,765.7L145.3,766.2L147.2,764.6L144.2,757.8L145.7,756.7L153.8,756.4L157.3,757.5L173.2,756.2L176.0,754.5L181.7,757.3L186.0,761.4L188.9,756.3L192.7,751.6L193.7,747.0Z"/>
+        <path id="lan-o"  class="lan" data-name="Västra Götaland"  data-pop="1 780 000" d="M38.6,647.8L30.9,648.3L31.0,653.8L33.4,654.9L38.4,651.3L38.6,647.8ZM40.4,637.0L33.2,637.8L26.7,643.7L30.6,646.3L33.1,644.1L37.5,645.6L41.0,644.0L40.4,637.0ZM148.8,614.1L144.6,609.0L138.3,609.3L134.4,602.6L130.9,592.7L127.8,591.1L105.8,590.5L100.2,595.5L97.4,602.7L99.8,607.5L94.1,608.5L81.2,604.3L78.8,594.3L76.1,590.7L75.1,585.8L71.8,583.6L69.3,586.5L57.2,581.3L54.6,579.0L50.5,582.1L46.2,579.5L41.2,579.3L35.9,598.3L31.7,600.3L28.3,599.6L28.4,595.9L24.8,588.4L20.0,588.5L16.8,591.9L16.0,596.3L18.9,598.9L20.4,605.2L18.5,608.8L21.1,613.9L21.4,623.5L20.2,629.9L25.8,630.8L29.9,636.3L32.5,636.9L38.2,632.4L41.1,632.4L43.5,639.8L40.2,647.2L40.9,649.1L37.0,658.1L39.1,663.6L37.4,667.2L42.4,669.5L44.8,675.2L50.5,675.8L58.8,673.3L60.0,680.5L62.9,683.7L62.1,686.7L63.5,691.2L66.4,691.6L69.3,688.6L74.8,691.4L81.8,692.8L82.1,697.3L88.0,699.7L95.1,690.5L98.6,688.3L103.3,683.7L108.3,676.2L109.8,667.3L111.3,663.8L110.7,659.7L121.3,659.0L127.3,656.1L128.2,651.1L135.0,638.3L148.8,614.1Z"/>
+        <path id="lan-m"  class="lan" data-name="Skåne"            data-pop="1 430 000" d="M139.0,738.8L129.6,736.2L123.1,735.2L119.4,738.7L104.5,741.9L101.8,741.9L97.8,742.2L92.1,746.6L84.4,745.0L83.0,740.8L80.6,739.0L77.8,740.9L73.6,739.4L70.3,742.2L74.2,745.6L77.8,751.0L73.2,753.5L71.1,751.5L66.1,750.5L69.8,759.6L74.9,766.5L77.4,772.8L81.2,775.9L81.0,780.7L84.2,782.0L86.0,785.1L84.8,787.8L81.3,790.6L81.3,794.0L83.8,800.9L93.9,804.0L97.5,804.0L106.4,799.8L115.4,799.0L123.0,801.6L126.2,801.4L132.7,793.7L132.5,791.4L126.7,782.1L127.1,776.6L132.1,769.0L139.5,763.2L140.7,757.4L139.1,752.6L135.8,751.1L134.5,746.4L139.0,738.8Z"/>
+      </svg>
+      <div class="map-legend" id="mapLegend" aria-hidden="true">
+        <span id="legendMin">Färre</span>
+        <div class="legend-ramp" id="legendRamp"></div>
+        <span id="legendMax">Fler invånare</span>
+      </div>
+    </div>
+
+    <!-- Info -->
+    <div class="info">
+      <p class="eyebrow rv rv-1">Öppen data · 21 län · Realtid</p>
+      <h1 class="rv rv-2">All data om <em>Sverige</em> på ett ställe.</h1>
+      <p class="lead rv rv-3">Väder, befolkning, trafik, polis och riksdag — hämtat direkt från <strong>svenska myndigheters öppna API:er</strong> och uppdaterat löpande, dygnet runt.</p>
+
+      <div class="stats-grid rv rv-4">
+        <div class="stat-card">
+          <div class="stat-num"><span data-count="10.5" data-decimals="1">0</span><span class="unit">&thinsp;M</span></div>
+          <div class="stat-label">Invånare</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num"><span data-count="21">0</span></div>
+          <div class="stat-label">Län</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num"><span data-count="290">0</span></div>
+          <div class="stat-label">Kommuner</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num"><span data-count="14">0</span></div>
+          <div class="stat-label">Datakällor</div>
+        </div>
+      </div>
+
+      <div class="rv rv-5">
+        <p class="sources-label">Datakällor</p>
+        <div class="chips">
+          <span class="chip">SCB</span>
+          <span class="chip">SMHI</span>
+          <span class="chip">Trafikverket</span>
+          <span class="chip">Polisen</span>
+          <span class="chip">Kolada</span>
+          <span class="chip">Riksdagen</span>
+          <span class="chip">Domstolsverket</span>
+          <span class="chip">BRÅ</span>
+          <span class="chip">Folkhälsomyndigheten</span>
+          <span class="chip">Valmyndigheten</span>
+          <span class="chip">Riksbanken</span>
+          <span class="chip">Nord Pool</span>
+          <span class="chip">Arbetsförmedlingen</span>
+          <span class="chip">SMHI Luftkvalitet</span>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <div class="scroll-hint" aria-hidden="true">
+    <span>Utforska</span>
+    <div class="scroll-line"></div>
+  </div>
+</div>
+
+<!-- Live ticker -->
+<div class="ticker-strip" aria-hidden="true">
+  <div class="ticker" id="ticker">
+    <span class="tick-item"><span class="tick-dot"></span>SMHI <b>~550 stationer</b></span>
+    <span class="tick-item"><span class="tick-dot"></span>Polisen <b>21 regioner</b></span>
+    <span class="tick-item"><span class="tick-dot"></span>SCB <b>befolkning · inkomst · bostad</b></span>
+    <span class="tick-item"><span class="tick-dot"></span>Kolada <b>290 kommuner</b></span>
+    <span class="tick-item"><span class="tick-dot amber"></span>Trafikverket <b>väglag · tåg</b></span>
+    <span class="tick-item"><span class="tick-dot"></span>Riksdagen <b>349 ledamöter</b></span>
+    <span class="tick-item"><span class="tick-dot"></span>BRÅ <b>anmälda brott 1996–</b></span>
+    <span class="tick-item"><span class="tick-dot"></span>Domstolsverket <b>alla domstolar</b></span>
+    <span class="tick-item"><span class="tick-dot"></span>Folkhälsomyndigheten <b>folkhälsodata</b></span>
+    <span class="tick-item"><span class="tick-dot"></span>Valmyndigheten <b>val 2002–2022</b></span>
+    <span class="tick-item"><span class="tick-dot"></span>Arbetsförmedlingen <b>lediga jobb · 21 regioner</b></span>
+    <span class="tick-item"><span class="tick-dot amber"></span>SMHI Luftkvalitet <b>PM2.5 · NO₂ · O₃</b></span>
+  </div>
+</div>
+
+<!-- Data pages -->
+<section class="section" id="data">
+  <div class="section-header">
+    <h2 class="section-title">Utforska <em>datan</em></h2>
+    <span class="section-sub">16 källor · 18 sidor</span>
+  </div>
+  <div class="cards">
+    <a href="/vader" class="card" style="--ac:79,163,232">
+      <div class="card-top">
+        <div class="card-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
+        </div>
+        <span class="card-label">SMHI</span>
+      </div>
+      <div class="card-title">Väder</div>
+      <div class="card-desc">Levande temperaturkarta med alla SMHI-stationer — varmast, kallast och hela fördelningen.</div>
+      <div class="card-foot">
+        <span class="card-live">Live</span>
+        <svg class="card-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
+    </a>
+    <a href="/befolkning" class="card" style="--ac:188,140,255">
+      <div class="card-top">
+        <div class="card-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <span class="card-label">SCB</span>
+      </div>
+      <div class="card-title">Befolkning</div>
+      <div class="card-desc">Folkmängd per län 1968–2024, kommuntoppen och tillväxt sedan år 2000.</div>
+      <div class="card-foot">
+        <span class="card-live">Live</span>
+        <svg class="card-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
+    </a>
+    <a href="/polis" class="card" style="--ac:247,129,102">
+      <div class="card-top">
+        <div class="card-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <span class="card-label">Polisen</span>
+      </div>
+      <div class="card-title">Polishändelser</div>
+      <div class="card-desc">Liveflöde från alla 21 län med filter, typstatistik och händelser per invånare.</div>
+      <div class="card-foot">
+        <span class="card-live">Live</span>
+        <svg class="card-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
+    </a>
+    <a href="/trafik" class="card" style="--ac:210,153,34">
+      <div class="card-top">
+        <div class="card-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        </div>
+        <span class="card-label">Trafikverket</span>
+      </div>
+      <div class="card-title">Trafik &amp; väglag</div>
+      <div class="card-desc">818 vägsegment · trafikflöde med realtidshastigheter från 3 000+ sensorer.</div>
+      <div class="card-foot">
+        <span class="card-live"><span class="card-live-dot"></span>Live · <span id="idx-trafik-speed">—</span> km/h snitt Sthlm</span>
+        <svg class="card-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
+    </a>
+    <a href="/ekonomi" class="card" style="--ac:227,179,65">
+      <div class="card-top">
+        <div class="card-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <span class="card-label">Riksbanken · Nord Pool</span>
+      </div>
+      <div class="card-title">Ekonomi &amp; elpriser</div>
+      <div class="card-desc">Styrränta och valutakurser sedan 2000 · elspotpris per prisområde SE1–SE4.</div>
+      <div class="card-foot">
+        <span class="card-live"><span class="card-live-dot"></span>Ränta <span id="idx-repo">—</span> % · El SE3 <span id="idx-el">—</span> öre/kWh</span>
+        <svg class="card-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
+    </a>
+    <a href="/arbetsmarknad" class="card" style="--ac:45,212,160">
+      <div class="card-top">
+        <div class="card-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+        </div>
+        <span class="card-label">Arbetsförmedlingen · Kolada</span>
+      </div>
+      <div class="card-title">Arbetsmarknad</div>
+      <div class="card-desc">Lediga jobb per län i realtid, yrkesfält i efterfrågan och kommunernas arbetslöshetstal.</div>
+      <div class="card-foot">
+        <span class="card-live"><span class="card-live-dot"></span><span id="idx-jobs">—</span> annonser nationellt</span>
+        <svg class="card-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
+    </a>
+    <a href="/utbildning" class="card" style="--ac:124,158,255">
+      <div class="card-top">
+        <div class="card-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+        </div>
+        <span class="card-label">Skolverket · Kolada · åk 9</span>
+      </div>
+      <div class="card-title">Skola</div>
+      <div class="card-desc">Hitta din kommuns skolresultat — betygspoäng åk 9, lärartäthet och antal skolor. Alla 290 kommuner.</div>
+      <div class="card-foot">
+        <span class="card-live"><span class="card-live-dot"></span>290 kommuner · Live</span>
+        <svg class="card-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
+    </a>
+    <a href="/riksdagen" class="card" style="--ac:63,185,80">
+      <div class="card-top">
+        <div class="card-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="m8 21 4-4 4 4"/><path d="M12 17V7"/></svg>
+        </div>
+        <span class="card-label">Riksdagen</span>
+      </div>
+      <div class="card-title">Riksdagen</div>
+      <div class="card-desc">Mandatfördelning, 327 ledamöter med foto, och senaste omröstningar per parti.</div>
+      <div class="card-foot">
+        <span class="card-live">Live</span>
+        <svg class="card-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
+    </a>
+    <a href="/inkomst" class="card" style="--ac:227,179,65">
+      <div class="card-top">
+        <div class="card-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <span class="card-label">SCB + Kolada</span>
+      </div>
+      <div class="card-title">Inkomster</div>
+      <div class="card-desc">Medelinkomst och median per län 1991–2024, inkomstspridning och arbetslöshet per kommun.</div>
+      <div class="card-foot">
+        <span class="card-live">Live</span>
+        <svg class="card-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
+    </a>
+    <a href="/halsa" class="card" style="--ac:45,212,160">
+      <div class="card-top">
+        <div class="card-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </div>
+        <span class="card-label">Folkhälsomyndigheten</span>
+      </div>
+      <div class="card-title">Folkhälsa</div>
+      <div class="card-desc">Medellivslängd, tobaksrökning och riskbruk av alkohol per län och kön.</div>
+      <div class="card-foot">
+        <span class="card-live"><span class="card-live-dot"></span>Live</span>
+        <svg class="card-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
+    </a>
+    <a href="/sjukskrivning" class="card" style="--ac:224,91,110">
+      <div class="card-top">
+        <div class="card-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a7 7 0 0 1 7 7c0 5-7 13-7 13S5 14 5 9a7 7 0 0 1 7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+        </div>
+        <span class="card-label">Försäkringskassan</span>
+      </div>
+      <div class="card-title">Sjukskrivning</div>
+      <div class="card-desc">Stressrelaterad sjukskrivning (F43) per län 2010–2024 — nationell trend och länsjämförelse.</div>
+      <div class="card-foot">
+        <span class="card-live"><span class="card-live-dot"></span>Live</span>
+        <svg class="card-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
+    </a>
+    <a href="/brp" class="card" style="--ac:227,179,65">
+      <div class="card-top">
+        <div class="card-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M7 10l3 3 3-3 4 4"/></svg>
+        </div>
+        <span class="card-label">SCB Nationalräkenskaperna</span>
+      </div>
+      <div class="card-title">Regional BNP</div>
+      <div class="card-desc">BRP per invånare per län 2000–2024 — ekonomisk produktion, tillväxt och länsjämförelse.</div>
+      <div class="card-foot">
+        <span class="card-live"><span class="card-live-dot"></span>Live</span>
+        <svg class="card-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
+    </a>
+    <a href="/energi" class="card" style="--ac:245,200,66">
+      <div class="card-top">
+        <div class="card-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </div>
+        <span class="card-label">Nord Pool · Energimyndigheten</span>
+      </div>
+      <div class="card-title">Energi</div>
+      <div class="card-desc">Elpris SE1–SE4, nationell energimix 1990–2024, vindkraft och solceller per län.</div>
+      <div class="card-foot">
+        <span class="card-live"><span class="card-live-dot"></span>Live</span>
+        <svg class="card-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
+    </a>
+    <a href="/skatt" class="card" style="--ac:240,90,90">
+      <div class="card-top">
+        <div class="card-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <span class="card-label">Skatteverket · SCB</span>
+      </div>
+      <div class="card-title">Skatt &amp; Inkomst</div>
+      <div class="card-desc">Kommunalskatt per av alla 290 kommuner 2017–2025, länsjämförelse och relation till medianinkomst.</div>
+      <div class="card-foot">
+        <span class="card-live"><span class="card-live-dot"></span>Live</span>
+        <svg class="card-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
+    </a>
+    <a href="/samband" class="card" style="--ac:232,161,60">
+      <div class="card-top">
+        <div class="card-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="16" r="2"/><circle cx="12" cy="8" r="2"/><circle cx="18" cy="14" r="2"/><path d="M3 21L21 3" stroke-dasharray="3 3"/></svg>
+        </div>
+        <span class="card-label">Korsanalys · 5 källor</span>
+      </div>
+      <div class="card-title">Dolda samband</div>
+      <div class="card-desc">Skatt, arbetslöshet, skulder, skolresultat och brott korsade i samma diagram — utforska vad som hänger ihop i 290 kommuner.</div>
+      <div class="card-foot">
+        <span class="card-live"><span class="card-live-dot"></span>Live</span>
+        <svg class="card-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
+    </a>
+    <a href="/domstol" class="card" style="--ac:124,108,255">
+      <div class="card-top">
+        <div class="card-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 22V12M21 22V12M12 22V8M2 12l10-9 10 9"/><path d="M6 22v-4h12v4"/></svg>
+        </div>
+        <span class="card-label">Domstolsverket</span>
+      </div>
+      <div class="card-title">Domstolar</div>
+      <div class="card-desc">Inkomna och avgjorda mål 2002–2025 per domstolsslag. Handläggningstider per tingsrätt.</div>
+      <div class="card-foot">
+        <span class="card-live"><span class="card-live-dot"></span>Live</span>
+        <svg class="card-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
+    </a>
+    <a href="/val" class="card" style="--ac:255,200,50">
+      <div class="card-top">
+        <div class="card-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        </div>
+        <span class="card-label">Valmyndigheten</span>
+      </div>
+      <div class="card-title">Riksdagsval</div>
+      <div class="card-desc">Partiresultat 2002–2022, SD:s tillväxt, valdeltagande och valkretsjämförelse.</div>
+      <div class="card-foot">
+        <span class="card-live">2002–2022</span>
+        <svg class="card-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
+    </a>
+    <a href="/brott" class="card" style="--ac:227,179,65">
+      <div class="card-top">
+        <div class="card-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+        </div>
+        <span class="card-label">BRÅ</span>
+      </div>
+      <div class="card-title">Anmälda brott</div>
+      <div class="card-desc">Misshandel, inbrott, rån och bedrägeri per län och kommun 1996–idag. Officiell kriminalstatistik.</div>
+      <div class="card-foot">
+        <span class="card-live"><span class="card-live-dot"></span>Live</span>
+        <svg class="card-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
+    </a>
+    <a href="/luftkvalitet" class="card" style="--ac:80,200,140">
+      <div class="card-top">
+        <div class="card-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 8C8 10 5.9 16.17 3.82 19.76"/><path d="M3.82 19.76C6 14 10.5 12.5 14 15"/><path d="M14 15c2.5 2.5 1.5 5.5 3 7"/><path d="M7 10c1.5-2.5 5-4 8-2"/></svg>
+        </div>
+        <span class="card-label">SMHI Luftkvalitet</span>
+      </div>
+      <div class="card-title">Luftkvalitet</div>
+      <div class="card-desc">PM2.5, PM10, NO₂ och O₃ per mätstation med WHO-gränsvärden. Väntar på att SMHI:s datavärdskap-API ska bli tillgängligt igen.</div>
+      <div class="card-foot">
+        <span class="card-soon">Kommer snart</span>
+        <svg class="card-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
+    </a>
+  </div>
+</section>
+
+<!-- Tooltip -->
+<div id="tooltip" role="tooltip">
+  <div class="tooltip-inner">
+    <div class="tooltip-head">
+      <div class="tooltip-name" id="tt-name"></div>
+      <span class="tooltip-code" id="tt-code"></span>
+    </div>
+    <div class="tooltip-pop" id="tt-pop"></div>
+    <div class="tooltip-bar"><i id="tt-bar"></i></div>
+    <div class="tooltip-live" id="tt-live" hidden>
+      <div class="tt-live-row"><span class="tt-live-dot temp"></span><span id="tt-temp"></span><span class="lbl">just nu</span></div>
+      <div class="tt-live-row"><span class="tt-live-dot pol"></span><span id="tt-events"></span><span class="lbl">7 dgr</span></div>
+    </div>
+    <div class="tooltip-cta" id="tt-cta">Visa mer →</div>
+    <div class="tooltip-touch-hint" id="tt-touch-hint" hidden>Tryck igen för att öppna</div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-logo">Sverige<span>Nu</span></div>
+    </div>
+    <p class="footer-text">
+      All data från svenska myndigheters öppna API:er.<br>
+      Byggd med Go + vanilla JS ·
+      <a href="https://scb.se">SCB</a> ·
+      <a href="https://smhi.se">SMHI</a> ·
+      <a href="https://polisen.se">Polisen</a> ·
+      <a href="/om">Om projektet</a>
+    </p>
+  </div>
+</footer>
+
+
+<script src="/js/index.js"></script>
+  <script src="/js/nav.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dolda samband — Sverige Nu</title>
+  <meta name="description" content="Utforska samband mellan skatt, arbetslöshet, skuldsättning, skolresultat och brottslighet i Sveriges 290 kommuner. Data från fem myndigheter i samma diagram.">
+  <meta name="robots" content="index, follow">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Sverige Nu">
+  <meta property="og:title" content="Dolda samband — Sverige Nu">
+  <meta property="og:description" content="Korskör öppen data från fem myndigheter: vad hänger ihop med vad i Sveriges kommuner?">
+  <meta property="og:url" content="https://sverigenu.se/samband">
+  <meta property="og:image" content="https://sverigenu.se/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="/fonts/fonts.css">
+  <link rel="stylesheet" href="/css/nav.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" integrity="sha384-NrKB+u6Ts6AtkIhwPixiKTzgSKNblyhlk0Sohlgar9UHUBzai/sgnNNWWd291xqt" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    :root {
+      --bg:#070b13; --bg2:#0a101c; --card-bg:#0f1726;
+      --border:#1b2940; --border2:#2a3f5f;
+      --text:#e3ebf5; --muted:#6b82a0; --dim:#3d5270;
+      --ac:#e8a13c; --ac2:#5b8bc4;
+      --green:#3fb950; --red:#ff7b72; --blue:#38b6ff;
+    }
+    html { scroll-behavior:smooth; }
+    body { font-family:'DM Sans',system-ui,sans-serif; background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased; overflow-x:hidden; }
+    ::selection { background:color-mix(in srgb,var(--ac) 30%,transparent); color:#fff; }
+    a { color:inherit; text-decoration:none; }
+    nav { display:flex; align-items:center; gap:1.5rem; padding:.9rem 2rem; border-bottom:1px solid var(--border); position:sticky; top:0; z-index:100; background:rgba(7,11,19,.92); backdrop-filter:blur(12px); flex-wrap:wrap; }
+    .nav-brand { font-family:'Fraunces',serif; font-weight:700; font-size:1.1rem; letter-spacing:-.01em; white-space:nowrap; }
+    .nav-brand span { color:var(--ac); }
+    .nav-links { display:flex; gap:1rem; flex-wrap:wrap; }
+    .nav-links a { font-size:.82rem; color:var(--muted); transition:color .2s; }
+    .nav-links a:hover, .nav-links a.active { color:#fff; }
+    /* Hero */
+    .hero { padding:4rem 2rem 2.5rem; max-width:1200px; margin:0 auto; }
+    .eyebrow { font-size:.75rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:.8rem; }
+    h1 { font-family:'Fraunces',serif; font-size:clamp(2rem,5vw,3.2rem); font-weight:700; line-height:1.1; letter-spacing:-.02em; color:#fff; margin-bottom:1rem; }
+    h1 em { color:var(--ac); font-style:normal; }
+    .lead { font-size:.95rem; color:var(--muted); max-width:600px; line-height:1.6; margin-bottom:2rem; }
+    .kpi-row { display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:2.5rem; }
+    .kpi { background:var(--card-bg); border:1px solid var(--border); border-radius:12px; padding:.85rem 1.2rem; min-width:150px; }
+    .kpi.accent { border-color:color-mix(in srgb,var(--ac) 40%,var(--border)); }
+    .kpi .label { font-size:.7rem; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); margin-bottom:.3rem; }
+    .kpi .val { font-family:'DM Mono',monospace; font-size:1.4rem; font-weight:600; color:#fff; }
+    .kpi .sub { font-size:.72rem; color:var(--dim); margin-top:.2rem; }
+    /* Sections */
+    .section { padding:2.5rem 2rem; max-width:1200px; margin:0 auto; }
+    .section-hdr { display:flex; align-items:baseline; gap:.8rem; margin-bottom:1.5rem; flex-wrap:wrap; }
+    .section-hdr h2 { font-family:'Fraunces',serif; font-size:1.4rem; font-weight:700; color:#fff; }
+    .badge { font-size:.7rem; letter-spacing:.08em; text-transform:uppercase; padding:.2rem .55rem; border-radius:4px; font-weight:600; }
+    .badge-orange { background:color-mix(in srgb,var(--ac) 18%,transparent); color:var(--ac); border:1px solid color-mix(in srgb,var(--ac) 35%,transparent); }
+    .badge-blue { background:color-mix(in srgb,var(--blue) 18%,transparent); color:var(--blue); border:1px solid color-mix(in srgb,var(--blue) 35%,transparent); }
+    hr.div { border:none; border-top:1px solid var(--border); margin:0 2rem; }
+    .chart-card { background:var(--card-bg); border:1px solid var(--border); border-radius:12px; padding:1.5rem; margin-bottom:1.5rem; }
+    /* Story chips */
+    .story-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:.8rem; margin-bottom:1.6rem; }
+    .story { text-align:left; background:var(--card-bg); border:1px solid var(--border); border-radius:12px; padding:.9rem 1.1rem; cursor:pointer; font-family:inherit; color:var(--text); transition:border-color .2s, transform .15s; }
+    .story:hover { border-color:var(--ac); transform:translateY(-1px); }
+    .story.active { border-color:var(--ac); background:color-mix(in srgb,var(--ac) 7%,var(--card-bg)); }
+    .story .s-r { font-family:'DM Mono',monospace; font-size:1.05rem; font-weight:600; color:var(--ac); }
+    .story .s-title { font-size:.85rem; font-weight:600; margin:.25rem 0 .2rem; color:#fff; }
+    .story .s-sub { font-size:.74rem; color:var(--muted); line-height:1.5; }
+    /* Scatter layout */
+    .ctrl-row { display:flex; gap:.6rem; align-items:center; flex-wrap:wrap; margin-bottom:1rem; }
+    .ctrl-row label { font-size:.78rem; color:var(--muted); }
+    select.sel { font-size:.8rem; background:var(--bg2); color:var(--text); border:1px solid var(--border2); border-radius:6px; padding:.3rem .6rem; cursor:pointer; }
+    .axis-desc { display:grid; grid-template-columns:1fr 1fr; gap:.8rem; margin-bottom:1rem; }
+    @media(max-width:780px){ .axis-desc { grid-template-columns:1fr; } }
+    .axis-desc .ad { background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:.7rem 1rem; font-size:.78rem; line-height:1.6; color:var(--muted); }
+    .axis-desc .ad b { display:block; font-size:.7rem; letter-spacing:.08em; text-transform:uppercase; color:var(--ac); margin-bottom:.25rem; font-weight:600; }
+    .axis-desc .ad strong { color:var(--text); }
+    .corr-strip { display:flex; gap:1rem; align-items:center; flex-wrap:wrap; margin-bottom:1rem; padding:.8rem 1.1rem; background:var(--bg2); border:1px solid var(--border); border-radius:10px; }
+    .metric-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:.9rem; }
+    .metric-card { background:var(--card-bg); border:1px solid var(--border); border-radius:12px; padding:1rem 1.2rem; }
+    .metric-card h3 { font-size:.9rem; font-weight:600; color:#fff; margin-bottom:.15rem; }
+    .metric-card .m-src { font-family:'DM Mono',monospace; font-size:.68rem; color:var(--dim); margin-bottom:.5rem; }
+    .metric-card p { font-size:.8rem; line-height:1.65; color:var(--muted); }
+    .metric-card .m-hl { display:flex; gap:.5rem; margin-top:.6rem; font-size:.7rem; }
+    .metric-card .m-hl span { padding:.15rem .5rem; border-radius:4px; background:var(--bg2); border:1px solid var(--border); color:var(--muted); }
+    .metric-card .m-hl span b { color:var(--text); font-weight:600; }
+    .corr-r { font-family:'DM Mono',monospace; font-size:1.7rem; font-weight:600; color:var(--ac); }
+    .corr-r .rlbl { font-size:.72rem; color:var(--dim); font-weight:400; }
+    .corr-text { font-size:.82rem; color:var(--muted); line-height:1.5; max-width:560px; }
+    .corr-text strong { color:var(--text); }
+    .scatter-wrap { position:relative; height:460px; }
+    @media(max-width:780px){ .scatter-wrap { height:380px; } }
+    .scatter-note { font-size:.78rem; color:var(--muted); margin-top:.7rem; line-height:1.55; }
+    /* Outlier list */
+    .rank-list { display:flex; flex-direction:column; }
+    .rank-item { display:flex; align-items:center; gap:.7rem; padding:.5rem 0; border-bottom:1px solid var(--border); font-size:.86rem; }
+    .rank-item:last-child { border-bottom:none; }
+    .rank-n { font-family:'DM Mono',monospace; font-size:.7rem; color:var(--dim); width:1.8rem; text-align:right; flex-shrink:0; }
+    .rank-name { flex:1; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .rank-val { font-family:'DM Mono',monospace; font-size:.8rem; text-align:right; flex-shrink:0; color:var(--muted); }
+    .two-col { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; }
+    @media(max-width:780px){ .two-col { grid-template-columns:1fr; } }
+    .col-title { font-size:.8rem; font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:var(--muted); margin-bottom:.7rem; }
+    /* Explain boxes */
+    .explain { background:rgba(15,23,38,.8); border:1px solid var(--border); border-left:3px solid var(--border2); border-radius:10px; padding:16px 20px; margin-bottom:1.2rem; font-size:.875rem; line-height:1.72; color:var(--muted); }
+    .explain.ac-orange { border-left-color:var(--ac); }
+    .explain.ac-blue { border-left-color:var(--blue); }
+    .explain.ac-red { border-left-color:var(--red); }
+    .explain strong { color:var(--text); font-weight:600; }
+    .explain p + p { margin-top:10px; }
+    .pills { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+    .pill { display:inline-flex; flex-direction:column; background:var(--card-bg); border:1px solid var(--border); border-radius:8px; padding:8px 12px; }
+    .pill .pl { font-size:.62rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--dim); margin-bottom:2px; }
+    .pill .pv { font-size:.83rem; color:var(--text); }
+    /* FAQ */
+    .prose-grid { display:grid; grid-template-columns:1.3fr 1fr; gap:40px; margin-top:8px; }
+    @media(max-width:800px){ .prose-grid { grid-template-columns:1fr; } }
+    .prose p { font-size:.92rem; line-height:1.75; color:var(--muted); margin-bottom:14px; }
+    .prose strong { color:var(--text); font-weight:600; }
+    details { border:1px solid var(--border); border-radius:10px; background:var(--card-bg); margin-bottom:8px; overflow:hidden; }
+    summary { padding:14px 18px; font-size:.88rem; font-weight:600; cursor:pointer; list-style:none; display:flex; justify-content:space-between; align-items:center; }
+    summary::-webkit-details-marker { display:none; }
+    summary::after { content:'+'; font-family:'DM Mono',monospace; color:var(--dim); }
+    details[open] summary::after { transform:rotate(45deg); color:var(--ac); }
+    summary:hover { color:var(--ac); }
+    details p { padding:0 18px 16px; font-size:.84rem; line-height:1.7; color:var(--muted); }
+    footer { border-top:1px solid var(--border); padding:2rem; font-size:.78rem; color:var(--dim); display:flex; gap:1rem; flex-wrap:wrap; justify-content:space-between; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-brand">Sverige<span>Nu</span></a>
+  <div class="nav-links">
+    <a href="/vader">Väder</a>
+    <a href="/polis">Polis</a>
+    <a href="/brott">Brott</a>
+    <a href="/trafik">Trafik</a>
+    <a href="/luftkvalitet">Luftkvalitet</a>
+    <a href="/ekonomi">Ekonomi</a>
+    <a href="/energi">Energi</a>
+    <a href="/skatt">Skatt</a>
+    <a href="/samband" class="active">Samband</a>
+    <a href="/inkomst">Inkomst</a>
+    <a href="/arbetsmarknad">Arbetsmarknad</a>
+    <a href="/befolkning">Befolkning</a>
+    <a href="/halsa">Hälsa</a>
+    <a href="/sjukskrivning">Sjukskrivning</a>
+    <a href="/utbildning">Utbildning</a>
+    <a href="/domstol">Domstol</a>
+    <a href="/riksdagen">Riksdagen</a>
+    <a href="/val">Val</a>
+    <a href="/brp">BRP</a>
+    <a href="/om">Om</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <p class="eyebrow">Korsanalys · Sex myndigheter · 290 kommuner</p>
+  <h1>Dolda <em>samband</em></h1>
+  <p class="lead">Ingen enskild myndighet visar hela bilden. Här korsas öppen data från Skatteverket, Kolada, BRÅ, SCB, Skolverket och Riksantikvarieämbetet i samma diagram — välj två mått och se hur Sveriges kommuner hänger ihop.</p>
+  <div class="kpi-row">
+    <div class="kpi accent"><div class="label">Kommuner</div><div class="val">290</div><div class="sub">Varje punkt i diagrammet</div></div>
+    <div class="kpi"><div class="label">Datakällor</div><div class="val">6</div><div class="sub">Myndigheter korsade</div></div>
+    <div class="kpi"><div class="label">Mått</div><div class="val">10</div><div class="sub">Valbara axlar</div></div>
+    <div class="kpi"><div class="label">Starkaste samband</div><div class="val" id="kpi-topr">–</div><div class="sub" id="kpi-topr-name">–</div></div>
+  </div>
+</section>
+
+<!-- SCATTER EXPLORER -->
+<section class="section" id="utforska">
+  <div class="section-hdr">
+    <h2>Utforska sambanden</h2>
+    <span class="badge badge-orange">Interaktiv</span>
+  </div>
+
+  <div class="explain ac-orange">
+    <p><strong>Så läser du diagrammet:</strong> varje punkt är en kommun. Punktens storlek visar folkmängd. Välj mått för X- och Y-axeln — korrelationen (r) räknas om direkt. <strong>r nära +1</strong> betyder att måtten stiger tillsammans, <strong>r nära −1</strong> att det ena stiger när det andra sjunker, <strong>r nära 0</strong> att inget linjärt samband syns.</p>
+    <p><strong>Viktigt:</strong> samband är inte orsakssamband. Att två mått följs åt bevisar inte att det ena orsakar det andra — ofta ligger en tredje faktor bakom båda.</p>
+  </div>
+
+  <div class="story-row" id="story-row">
+    <button class="story" data-x="arbetsloshet" data-y="skuldsatta">
+      <span class="s-r" data-r>–</span>
+      <div class="s-title">Arbetslöshet × skuldsättning</div>
+      <div class="s-sub">Där jobben saknas hamnar fler hos Kronofogden — två register, samma karta.</div>
+    </button>
+    <button class="story" data-x="skuldsatta" data-y="meritvarde">
+      <span class="s-r" data-r>–</span>
+      <div class="s-title">Skuldsättning × skolresultat</div>
+      <div class="s-sub">Där fler vuxna har skulder hos Kronofogden är niondeklassarnas meritvärde lägre.</div>
+    </button>
+    <button class="story" data-x="skattesats" data-y="meritvarde">
+      <span class="s-r" data-r>–</span>
+      <div class="s-title">Skattesats × skolresultat</div>
+      <div class="s-sub">Kommuner med högst skatt har ofta sämre skolresultat — betala mer, få mindre.</div>
+    </button>
+  </div>
+
+  <div class="chart-card">
+    <div class="ctrl-row">
+      <label for="ax-x">X-axel:</label>
+      <select class="sel" id="ax-x"></select>
+      <label for="ax-y" style="margin-left:.6rem">Y-axel:</label>
+      <select class="sel" id="ax-y"></select>
+      <label for="hl-county" style="margin-left:.6rem">Markera län:</label>
+      <select class="sel" id="hl-county"></select>
+    </div>
+    <div class="axis-desc" id="axis-desc"></div>
+    <div class="corr-strip">
+      <div class="corr-r"><span id="corr-val">–</span> <span class="rlbl">r (Pearson)</span></div>
+      <div class="corr-text" id="corr-text">Väljer du två mått räknas korrelationen ut här.</div>
+    </div>
+    <div class="scatter-wrap"><canvas id="scatter"></canvas></div>
+    <p class="scatter-note" id="scatter-note"></p>
+  </div>
+
+  <div class="chart-card">
+    <div class="col-title">Utstickare — kommuner längst från trendlinjen</div>
+    <div class="two-col">
+      <div>
+        <div class="col-title" style="color:var(--green)" id="out-above-title">Över trenden</div>
+        <div class="rank-list" id="out-above"></div>
+      </div>
+      <div>
+        <div class="col-title" style="color:var(--red)" id="out-below-title">Under trenden</div>
+        <div class="rank-list" id="out-below"></div>
+      </div>
+    </div>
+    <p class="scatter-note">Utstickarna avviker mest från det förväntade värdet givet sambandet — kommuner som går mot strömmen och kan vara värda en närmare titt.</p>
+  </div>
+</section>
+
+<hr class="div">
+
+<!-- METRIC GUIDE -->
+<section class="section" id="matten">
+  <div class="section-hdr">
+    <h2>Vad betyder måtten?</h2>
+    <span class="badge badge-blue">Ordlista</span>
+  </div>
+  <div class="explain ac-blue">
+    <p>Alla tio mått förklarade på vanlig svenska — vad de mäter, var de kommer ifrån och vad som räknas som högt eller lågt. Samma texter visas ovanför diagrammet när du väljer mått.</p>
+  </div>
+  <div class="metric-grid" id="metric-grid"></div>
+</section>
+
+<hr class="div">
+
+<!-- KAPITAL CONCENTRATION -->
+<section class="section" id="kapital">
+  <div class="section-hdr">
+    <h2>Kapitalinkomsternas koncentration</h2>
+    <span class="badge badge-blue">Skatteverket</span>
+  </div>
+  <div class="explain ac-red">
+    <p><strong>Sveriges mest ojämnt fördelade inkomst.</strong> I Stockholms län är <strong>medianen</strong> för skatt på kapital bara några hundralappar — men <strong>medelvärdet</strong> ligger på över 140 000 kr. Det betyder att hälften av alla med kapitalinkomst nästan inte har någon alls, medan en liten grupp står för nästan allt. Den klyftan syns inte i lönestatistiken — den blir synlig först när median och medel ställs bredvid varandra.</p>
+    <div class="pills">
+      <div class="pill"><span class="pl">Källa</span><span class="pv">Skatteverket 186462ce</span></div>
+      <div class="pill"><span class="pl">Mått</span><span class="pv">Överskott av kapital per mottagare</span></div>
+      <div class="pill"><span class="pl">Nivå</span><span class="pv">Län, senaste år</span></div>
+    </div>
+  </div>
+  <div class="chart-card">
+    <div class="scatter-wrap" style="height:520px"><canvas id="kapital-bar"></canvas></div>
+    <p class="scatter-note">Genomsnittligt överskott av kapital per person som deklarerade kapitalinkomst. Stockholms län ligger dubbelt så högt som de flesta andra län — kapitalet är geografiskt koncentrerat på ett sätt som löneinkomster inte är.</p>
+  </div>
+</section>
+
+<hr class="div">
+
+<!-- OM / FAQ -->
+<section class="section" id="om-sidan">
+  <div class="section-hdr"><h2>Om analysen &amp; vanliga frågor</h2></div>
+  <div class="prose-grid">
+    <div class="prose">
+      <p><strong>Varför korsa datakällor?</strong> Myndigheter publicerar sina siffror var för sig: BRÅ visar brott, Kronofogden skulder, Skolverket betyg. Mönstren mellan dem — att skuldsättning, arbetslöshet och skolresultat följs åt kommun för kommun — syns först när registren läggs ovanpå varandra. Det är den analysen den här sidan gör, med samma öppna data som myndigheterna själva publicerar.</p>
+      <p><strong>Metod:</strong> varje kommun matchas via kommunnamn över källorna. Korrelationen är Pearsons r beräknad på alla kommuner med värde i båda måtten. Varje mått använder sitt senaste tillgängliga år. Trendlinjen är en enkel linjär regression (minsta kvadratmetoden).</p>
+      <p><strong>Tolka försiktigt:</strong> kommuner är olika stora — en korrelation över 290 kommuner väger Bjurholm lika tungt som Stockholm. Punktstorleken visar folkmängd så att du själv kan se om sambandet drivs av små eller stora kommuner.</p>
+    </div>
+    <div>
+      <details>
+        <summary>Betyder sambanden att det ena orsakar det andra?</summary>
+        <p>Nej. Korrelation visar bara att två mått samvarierar. Bakom sambandet mellan skuldsättning och skolresultat ligger sannolikt gemensamma faktorer som utbildningsnivå, arbetsmarknad och socioekonomi — inte att skulder i sig sänker betyg.</p>
+      </details>
+      <details>
+        <summary>Vilka källor används?</summary>
+        <p>Skatteverket (skattesats, faktisk skatt, kapitalinkomster), Kolada/RKA (arbetslöshet, Kronofogden-skulder, meritvärde, ekonomiskt bistånd, folkmängd), BRÅ (anmälda brott per 100 000 invånare), SCB (inkomst) och Riksantikvarieämbetet (fornlämningar). Alla hämtas automatiskt via öppna API:er.</p>
+      </details>
+      <details>
+        <summary>Varför är vissa mått från olika år?</summary>
+        <p>Myndigheterna publicerar i olika takt. Varje mått använder sitt senaste tillgängliga år — skattesatsen gäller 2025, Kronofogden-data 2025, medan faktisk skatt per person senast avser inkomståret 2023. Skillnaden påverkar sambanden marginellt eftersom kommunmönstren ändras långsamt.</p>
+      </details>
+      <details>
+        <summary>Vad är ett "starkt" samband?</summary>
+        <p>En tumregel: |r| under 0,2 är försumbart, 0,2–0,4 svagt, 0,4–0,6 måttligt, 0,6–0,8 starkt och över 0,8 mycket starkt. Sambandet arbetslöshet × skuldsättning (~0,65) hör till de starkaste som går att hitta i kommunal statistik.</p>
+      </details>
+      <details>
+        <summary>Varför är just medianen viktig för kapitalinkomster?</summary>
+        <p>Medelvärdet dras upp kraftigt av ett fåtal personer med mycket stora kapitalvinster. Medianen visar den typiska personen. När medel är 500 gånger högre än medianen — som för skatt på kapital i Stockholm — är inkomsten extremt koncentrerad till toppen.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>Sverige Nu · Öppen data</span>
+  <span>Källor: Skatteverket · Kolada · BRÅ · SCB · Skolverket · RAÄ</span>
+  <a href="/om" style="color:var(--muted)">Om sidan</a>
+</footer>
+
+<script src="/js/samband.js"></script>
+<script src="/js/nav.js" defer></script>
+</body>
+</html>

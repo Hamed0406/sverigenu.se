@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Energi — Sverige Nu</title>
+  <meta name="description" content="Aktuellt elpris, nationell energimix och förnybar energi per län. Vindkraft, solkraft, vattenkraft och kärnkraft i Sverige.">
+  <meta name="robots" content="index, follow">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Sverige Nu">
+  <meta property="og:title" content="Energi — Sverige Nu">
+  <meta property="og:description" content="Elpris SE1–SE4, nationell energimix 1990–2024, vindkraft och solceller per län. Källa: Nord Pool, Energimyndigheten.">
+  <meta property="og:url" content="https://sverigenu.se/energi">
+  <meta property="og:image" content="https://sverigenu.se/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="/fonts/fonts.css">
+  <link rel="stylesheet" href="/css/nav.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" integrity="sha384-NrKB+u6Ts6AtkIhwPixiKTzgSKNblyhlk0Sohlgar9UHUBzai/sgnNNWWd291xqt" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    :root {
+      --bg:#070b13; --bg2:#0a101c; --card-bg:#0f1726;
+      --border:#1b2940; --border2:#2a3f5f;
+      --text:#e3ebf5; --muted:#6b82a0; --dim:#3d5270;
+      --green:#3fb950; --red:#ff7b72; --blue:#38b6ff;
+      --ac-wind:#56e0a0;
+      --ac-solar:#f5c842;
+      --ac-hydro:#4ea8f5;
+      --ac-nuclear:#e05ae0;
+      --ac-price:#ff9444;
+      --ac: var(--ac-wind);
+    }
+    html { scroll-behavior:smooth; }
+    body { font-family:'DM Sans',system-ui,sans-serif; background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased; overflow-x:hidden; }
+    ::selection { background:color-mix(in srgb,var(--ac-wind) 30%,transparent); color:#fff; }
+    a { color:inherit; text-decoration:none; }
+    /* ── Nav ────────────────────────────────────────────────────── */
+    nav { display:flex; align-items:center; gap:1.5rem; padding:.9rem 2rem; border-bottom:1px solid var(--border); position:sticky; top:0; z-index:100; background:rgba(7,11,19,.92); backdrop-filter:blur(12px); flex-wrap:wrap; }
+    .nav-brand { font-family:'Fraunces',serif; font-weight:700; font-size:1.1rem; letter-spacing:-.01em; white-space:nowrap; color:#fff; }
+    .nav-brand span { color:var(--ac-wind); }
+    .nav-links { display:flex; gap:1rem; flex-wrap:wrap; }
+    .nav-links a { font-size:.82rem; color:var(--muted); transition:color .2s; }
+    .nav-links a:hover, .nav-links a.active { color:#fff; }
+    /* ── Hero ───────────────────────────────────────────────────── */
+    .hero { padding:4rem 2rem 2.5rem; max-width:1200px; margin:0 auto; }
+    .hero-eyebrow { font-size:.75rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:.8rem; }
+    .hero-title { font-family:'Fraunces',serif; font-size:clamp(2rem,5vw,3.2rem); font-weight:700; line-height:1.1; letter-spacing:-.02em; color:#fff; margin-bottom:1rem; }
+    .hero-title .hl-wind   { color:var(--ac-wind); }
+    .hero-title .hl-solar  { color:var(--ac-solar); }
+    .hero-title .hl-price  { color:var(--ac-price); }
+    .hero-sub { font-size:.95rem; color:var(--muted); max-width:580px; line-height:1.6; margin-bottom:2rem; }
+    /* ── Hero KPIs ──────────────────────────────────────────────── */
+    .hero-kpis { display:flex; gap:1rem; flex-wrap:wrap; }
+    .kpi-pill { background:var(--card-bg); border:1px solid var(--border); border-radius:12px; padding:.85rem 1.2rem; min-width:140px; }
+    .kpi-pill .kpi-label { font-size:.72rem; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin-bottom:.35rem; }
+    .kpi-pill .kpi-value { font-family:'DM Mono',monospace; font-size:1.45rem; font-weight:600; color:#fff; }
+    .kpi-pill .kpi-unit  { font-size:.72rem; color:var(--muted); margin-left:.3rem; }
+    .kpi-pill.kpi-wind   { border-color:color-mix(in srgb,var(--ac-wind) 35%,var(--border)); }
+    .kpi-pill.kpi-solar  { border-color:color-mix(in srgb,var(--ac-solar) 35%,var(--border)); }
+    .kpi-pill.kpi-hydro  { border-color:color-mix(in srgb,var(--ac-hydro) 35%,var(--border)); }
+    .kpi-pill.kpi-nuclear{ border-color:color-mix(in srgb,var(--ac-nuclear) 35%,var(--border)); }
+    .kpi-pill.kpi-price  { border-color:color-mix(in srgb,var(--ac-price) 35%,var(--border)); }
+    /* ── Sections ───────────────────────────────────────────────── */
+    .section { padding:2.5rem 2rem; max-width:1200px; margin:0 auto; }
+    .section-header { display:flex; align-items:baseline; gap:1rem; margin-bottom:1.5rem; flex-wrap:wrap; }
+    .section-title { font-family:'Fraunces',serif; font-size:1.4rem; font-weight:700; color:#fff; }
+    .section-badge { font-size:.7rem; letter-spacing:.08em; text-transform:uppercase; padding:.2rem .55rem; border-radius:4px; font-weight:600; }
+    .badge-wind   { background:color-mix(in srgb,var(--ac-wind) 18%,transparent);   color:var(--ac-wind);   border:1px solid color-mix(in srgb,var(--ac-wind) 35%,transparent); }
+    .badge-solar  { background:color-mix(in srgb,var(--ac-solar) 18%,transparent);  color:var(--ac-solar);  border:1px solid color-mix(in srgb,var(--ac-solar) 35%,transparent); }
+    .badge-hydro  { background:color-mix(in srgb,var(--ac-hydro) 18%,transparent);  color:var(--ac-hydro);  border:1px solid color-mix(in srgb,var(--ac-hydro) 35%,transparent); }
+    .badge-price  { background:color-mix(in srgb,var(--ac-price) 18%,transparent);  color:var(--ac-price);  border:1px solid color-mix(in srgb,var(--ac-price) 35%,transparent); }
+    .badge-mix    { background:color-mix(in srgb,var(--blue) 18%,transparent);       color:var(--blue);      border:1px solid color-mix(in srgb,var(--blue) 35%,transparent); }
+    .section-desc { font-size:.85rem; color:var(--muted); margin-top:.3rem; }
+    hr.divider { border:none; border-top:1px solid var(--border); margin:0 2rem; }
+    /* ── Explain boxes ──────────────────────────────────────────── */
+    .explain-box { background:rgba(15,23,38,.8); border:1px solid var(--border); border-left:3px solid var(--border2); border-radius:10px; padding:18px 22px; margin-bottom:1.2rem; font-size:.875rem; line-height:1.72; color:var(--muted); }
+    .explain-box.accent-price  { border-left-color:var(--ac-price); }
+    .explain-box.accent-mix    { border-left-color:var(--ac-hydro); }
+    .explain-box.accent-county { border-left-color:var(--ac-wind); }
+    .explain-box strong { color:var(--text); font-weight:600; }
+    .explain-box p + p { margin-top:10px; }
+    .explain-pills { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+    .explain-pill { display:inline-flex; flex-direction:column; background:var(--card-bg); border:1px solid var(--border); border-radius:8px; padding:9px 14px; min-width:120px; }
+    .explain-pill .ep-label { font-size:.62rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--dim); margin-bottom:3px; }
+    .explain-pill .ep-val { font-size:.84rem; color:var(--text); }
+    /* ── Cards / charts ─────────────────────────────────────────── */
+    .chart-card { background:var(--card-bg); border:1px solid var(--border); border-radius:12px; padding:1.5rem; margin-bottom:1.5rem; }
+    .chart-card canvas { max-height:340px; }
+    .two-col { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; }
+    @media(max-width:780px){ .two-col{ grid-template-columns:1fr; } }
+    /* ── Elpris zone tabs ───────────────────────────────────────── */
+    .zone-tabs { display:flex; gap:.5rem; margin-bottom:1rem; flex-wrap:wrap; }
+    .zone-tab { font-size:.78rem; font-family:'DM Mono',monospace; padding:.3rem .7rem; border-radius:6px; border:1px solid var(--border); background:transparent; color:var(--muted); cursor:pointer; transition:all .2s; }
+    .zone-tab.active { border-color:var(--ac-price); color:var(--ac-price); background:color-mix(in srgb,var(--ac-price) 12%,transparent); }
+    /* ── County ranking table ───────────────────────────────────── */
+    .ranking-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; }
+    @media(max-width:700px){ .ranking-grid{ grid-template-columns:1fr; } }
+    .rank-list { }
+    .rank-item { display:flex; align-items:center; gap:.7rem; padding:.55rem 0; border-bottom:1px solid var(--border); font-size:.88rem; }
+    .rank-item:last-child { border-bottom:none; }
+    .rank-num { font-family:'DM Mono',monospace; font-size:.72rem; color:var(--dim); width:1.8rem; text-align:right; }
+    .rank-name { flex:1; color:var(--text); }
+    .rank-bar-wrap { width:90px; height:6px; background:var(--border); border-radius:3px; }
+    .rank-bar { height:6px; border-radius:3px; }
+    .rank-bar.wind  { background:var(--ac-wind); }
+    .rank-bar.solar { background:var(--ac-solar); }
+    .rank-val { font-family:'DM Mono',monospace; font-size:.82rem; color:var(--text); width:70px; text-align:right; }
+    /* ── Year select ────────────────────────────────────────────── */
+    .year-controls { display:flex; gap:.5rem; align-items:center; flex-wrap:wrap; margin-bottom:1rem; }
+    .year-controls label { font-size:.78rem; color:var(--muted); }
+    .year-select { font-size:.8rem; background:var(--bg2); color:var(--text); border:1px solid var(--border2); border-radius:6px; padding:.3rem .6rem; cursor:pointer; }
+    /* ── Source note ────────────────────────────────────────────── */
+    .source-note { font-size:.75rem; color:var(--dim); margin-top:1rem; }
+    /* ── Loading / error ────────────────────────────────────────── */
+    .loading { text-align:center; padding:3rem; color:var(--muted); font-size:.9rem; }
+    .error-msg { background:color-mix(in srgb,var(--red) 10%,var(--card-bg)); border:1px solid color-mix(in srgb,var(--red) 30%,var(--border)); border-radius:8px; padding:1rem; color:var(--red); font-size:.85rem; margin-bottom:1rem; }
+    /* ── Footer ─────────────────────────────────────────────────── */
+    footer { border-top:1px solid var(--border); padding:2rem; margin-top:3rem; font-size:.78rem; color:var(--dim); display:flex; gap:1rem; flex-wrap:wrap; justify-content:space-between; }
+  
+    /* ── FAQ / prose ──────────────────────────────────────────────── */
+    .prose-grid { display:grid; grid-template-columns:1.3fr 1fr; gap:40px; margin-top:48px; }
+    @media(max-width:800px){ .prose-grid{ grid-template-columns:1fr; } }
+    .prose p { font-size:.92rem; line-height:1.75; color:var(--muted); margin-bottom:14px; }
+    .prose strong { color:var(--text); font-weight:600; }
+    details { border:1px solid var(--border); border-radius:10px; background:var(--card-bg); margin-bottom:8px; overflow:hidden; }
+    summary { padding:14px 18px; font-size:.88rem; font-weight:600; cursor:pointer; list-style:none; display:flex; justify-content:space-between; align-items:center; transition:color .15s; }
+    summary::-webkit-details-marker { display:none; }
+    summary::after { content:'+'; font-family:'DM Mono',monospace; color:var(--dim); transition:transform .2s; }
+    details[open] summary::after { transform:rotate(45deg); color:var(--ac); }
+    summary:hover { color:var(--ac); }
+    details p { padding:0 18px 16px; font-size:.84rem; line-height:1.7; color:var(--muted); }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-brand">Sverige<span>Nu</span></a>
+  <div class="nav-links">
+    <a href="/vader">Väder</a>
+    <a href="/polis">Polis</a>
+    <a href="/brott">Brott</a>
+    <a href="/trafik">Trafik</a>
+    <a href="/luftkvalitet">Luftkvalitet</a>
+    <a href="/ekonomi">Ekonomi</a>
+    <a href="/energi" class="active">Energi</a>
+    <a href="/arbetsmarknad">Arbetsmarknad</a>
+    <a href="/befolkning">Befolkning</a>
+    <a href="/skatt">Skatt</a>
+    <a href="/samband">Samband</a>
+    <a href="/inkomst">Inkomst</a>
+    <a href="/halsa">Hälsa</a>
+    <a href="/sjukskrivning">Sjukskrivning</a>
+    <a href="/utbildning">Utbildning</a>
+    <a href="/domstol">Domstol</a>
+    <a href="/riksdagen">Riksdagen</a>
+    <a href="/val">Val</a>
+    <a href="/brp">BRP</a>
+    <a href="/om">Om</a>
+  </div>
+</nav>
+
+<!-- ── HERO ──────────────────────────────────────────────────── -->
+<section class="hero">
+  <p class="hero-eyebrow">Energi · Sverige</p>
+  <h1 class="hero-title">
+    <span class="hl-price">Elpris</span>,
+    <span class="hl-wind">Vindkraft</span> &amp;<br>
+    <span class="hl-solar">Solceller</span> i Sverige
+  </h1>
+  <p class="hero-sub">Aktuellt spotpris per priszon, nationell energimix sedan 1990, vindkraftproduktion och installerad solcellskapacitet per län. Källa: Nord Pool, Energimyndigheten.</p>
+  <div class="hero-kpis" id="hero-kpis">
+    <div class="kpi-pill kpi-price"><div class="kpi-label">Elpris SE3 nu</div><div class="kpi-value" id="kpi-price">–<span class="kpi-unit">öre/kWh</span></div></div>
+    <div class="kpi-pill kpi-wind"><div class="kpi-label">Vindkraft 2024</div><div class="kpi-value" id="kpi-wind">–<span class="kpi-unit">TWh</span></div></div>
+    <div class="kpi-pill kpi-solar"><div class="kpi-label">Solkraft 2024</div><div class="kpi-value" id="kpi-solar">–<span class="kpi-unit">TWh</span></div></div>
+    <div class="kpi-pill kpi-hydro"><div class="kpi-label">Vattenkraft 2024</div><div class="kpi-value" id="kpi-hydro">–<span class="kpi-unit">TWh</span></div></div>
+    <div class="kpi-pill kpi-nuclear"><div class="kpi-label">Kärnkraft 2024</div><div class="kpi-value" id="kpi-nuclear">–<span class="kpi-unit">TWh</span></div></div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ── ELPRIS ────────────────────────────────────────────────── -->
+<section class="section" id="elpris-section">
+  <div class="section-header">
+    <h2 class="section-title">Elpris per priszon</h2>
+    <span class="section-badge badge-price">Realtid</span>
+  </div>
+  <div class="explain-box accent-price">
+    <p><strong>Sverige är uppdelat i fyra elpriszoner</strong> (SE1–SE4). Priset varierar mellan zonerna beroende på lokal produktion och kapacitet i elnätet. Norra Sverige har mestadels billigare el tack vare den stora vattenkraften i norr, medan södra Sverige (SE4) ibland måste importera el och därmed får högre priser.</p>
+    <p><strong>Spotpriset</strong> sätts varje dag på elbörsen Nord Pool och gäller för 15-minutersintervall. Det pris du betalar på fakturan är spotpriset <em>plus</em> nätavgift, elcertifikat, energiskatt (~54 öre/kWh) och 25% moms — dessa tillägg ingår <strong>inte</strong> i priserna nedan.</p>
+    <div class="explain-pills">
+      <div class="explain-pill"><span class="ep-label">SE1</span><span class="ep-val">Luleå / Norr</span></div>
+      <div class="explain-pill"><span class="ep-label">SE2</span><span class="ep-val">Sundsvall / N. Mellansv.</span></div>
+      <div class="explain-pill"><span class="ep-label">SE3</span><span class="ep-val">Stockholm / S. Mellansv.</span></div>
+      <div class="explain-pill"><span class="ep-label">SE4</span><span class="ep-val">Malmö / Söder</span></div>
+      <div class="explain-pill"><span class="ep-label">Uppdateras</span><span class="ep-val">Var 15:e minut</span></div>
+      <div class="explain-pill"><span class="ep-label">Källa</span><span class="ep-val">Nord Pool / elprisetjustnu.se</span></div>
+    </div>
+  </div>
+  <div class="zone-tabs" id="zone-tabs">
+    <button class="zone-tab active" data-zone="SE1">SE1 Norrland</button>
+    <button class="zone-tab" data-zone="SE2">SE2 Norra Sverige</button>
+    <button class="zone-tab" data-zone="SE3">SE3 Mellansverige</button>
+    <button class="zone-tab" data-zone="SE4">SE4 Södra Sverige</button>
+  </div>
+  <div class="chart-card" id="elpris-loading" style="text-align:center;padding:2rem;color:var(--muted);">Laddar elprisdata…</div>
+  <div class="chart-card" id="elpris-chart-wrap" style="display:none;"><canvas id="elpris-chart"></canvas></div>
+  <p class="source-note">Källa: <a href="https://www.elprisetjustnu.se" style="color:var(--muted);text-decoration:underline;" target="_blank" rel="noopener">elprisetjustnu.se</a> / Nord Pool. Priset uppdateras var 15:e minut.</p>
+</section>
+
+<hr class="divider">
+
+<!-- ── ENERGIMIX ─────────────────────────────────────────────── -->
+<section class="section" id="mix-section">
+  <div class="section-header">
+    <h2 class="section-title">Nationell energimix</h2>
+    <span class="section-badge badge-mix">1990–2024</span>
+  </div>
+  <div class="explain-box accent-mix">
+    <p><strong>Energimixen</strong> visar hur mycket el (terawattimmar, TWh) Sverige producerar från varje kraftslag per år. Sverige har ett av världens lägsta utsläpp per kWh el tack vare den unika kombinationen av vattenkraft och kärnkraft.</p>
+    <p><strong>Vattenkraft</strong> (~65 TWh/år) levererar stabil baskraft och flexibel reglerkraft. <strong>Kärnkraft</strong> (~50 TWh/år) ger planerbar produktion dygnet runt. <strong>Vindkraft</strong> har vuxit snabbt — från 1 TWh år 2000 till 40+ TWh 2024. <strong>Solkraft</strong> är ännu liten men ökar exponentiellt, med en fördubbling ungefär vart tredje år sedan 2018.</p>
+    <div class="explain-pills">
+      <div class="explain-pill"><span class="ep-label">Vattenkraft</span><span class="ep-val">~65 TWh / år</span></div>
+      <div class="explain-pill"><span class="ep-label">Kärnkraft</span><span class="ep-val">~50 TWh / år</span></div>
+      <div class="explain-pill"><span class="ep-label">Vindkraft</span><span class="ep-val">~40 TWh / år</span></div>
+      <div class="explain-pill"><span class="ep-label">Solkraft</span><span class="ep-val">~4 TWh / år</span></div>
+      <div class="explain-pill"><span class="ep-label">Källa</span><span class="ep-val">Energimyndigheten EN0202_25</span></div>
+      <div class="explain-pill"><span class="ep-label">Uppdateras</span><span class="ep-val">Årsvis</span></div>
+    </div>
+  </div>
+  <div class="chart-card" id="mix-loading" style="text-align:center;padding:2rem;color:var(--muted);">Laddar energimix…</div>
+  <div class="chart-card" id="mix-chart-wrap" style="display:none;"><canvas id="mix-chart"></canvas></div>
+  <p class="source-note">Källa: Energimyndigheten, EN0202_25. Notis: Vindkraft och solkraft 2024 är preliminära eller ännu ej publicerade i tabellen.</p>
+</section>
+
+<hr class="divider">
+
+<!-- ── VINDKRAFT & SOLCELLER per LÄN ─────────────────────────── -->
+<section class="section" id="county-section">
+  <div class="section-header">
+    <h2 class="section-title">Förnybar energi per län</h2>
+    <span class="section-badge badge-wind">Vindkraft</span>
+    <span class="section-badge badge-solar">Solceller</span>
+  </div>
+  <div class="explain-box accent-county">
+    <p><strong>Vindkraft</strong> är koncentrerad till norra Sverige (Norrbotten, Västernorrland, Jämtland) och längs kusterna, där det blåser mer och marken är billigare. Sverige har som mål att producera 100% förnybar el till 2040 — vindkraften spelar en nyckelroll för att nå det.</p>
+    <p><strong>Solceller</strong> följer ett omvänt geografiskt mönster: tätbefolkade och soliga sydliga län (Västra Götaland, Skåne, Stockholm) har mest installerad kapacitet. Totalt installerat i Sverige har mer än tiodubblats sedan 2018 och överstiger nu 4 500 MW.</p>
+    <div class="explain-pills">
+      <div class="explain-pill"><span class="ep-label">Vindkraft källa</span><span class="ep-val">Energimyndigheten EN0105_3</span></div>
+      <div class="explain-pill"><span class="ep-label">Solceller källa</span><span class="ep-val">Energimyndigheten EN0123_1</span></div>
+      <div class="explain-pill"><span class="ep-label">Vindkraft historik</span><span class="ep-val">Sedan 2003</span></div>
+      <div class="explain-pill"><span class="ep-label">Solceller historik</span><span class="ep-val">Sedan 2016</span></div>
+      <div class="explain-pill"><span class="ep-label">Uppdateras</span><span class="ep-val">Årsvis</span></div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <!-- Vindkraft ranking -->
+    <div>
+      <div class="year-controls">
+        <label for="wind-year-sel">Vindkraft år:</label>
+        <select class="year-select" id="wind-year-sel"></select>
+      </div>
+      <div id="wind-ranking-loading" class="loading">Laddar vindkraftdata…</div>
+      <div id="wind-ranking" class="rank-list" style="display:none;"></div>
+    </div>
+    <!-- Solceller ranking -->
+    <div>
+      <div class="year-controls">
+        <label for="sol-year-sel">Solceller år:</label>
+        <select class="year-select" id="sol-year-sel"></select>
+      </div>
+      <div id="sol-ranking-loading" class="loading">Laddar solcellsdata…</div>
+      <div id="sol-ranking" class="rank-list" style="display:none;"></div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ── COUNTY TREND CHART ─────────────────────────────────────── -->
+<section class="section" id="trend-section">
+  <div class="section-header">
+    <h2 class="section-title">Läns-trend — Vindkraft</h2>
+    <span class="section-badge badge-wind">GWh Produktion</span>
+  </div>
+  <p class="section-desc">Välj upp till 5 län att jämföra (elproduktion GWh).</p>
+  <div class="chart-card">
+    <div id="trend-county-picks" style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem;"></div>
+    <canvas id="wind-trend-chart"></canvas>
+  </div>
+  <p class="source-note">Källa: Energimyndigheten, EN0105_3.</p>
+</section>
+
+<hr class="divider">
+
+<!-- ── SOLAR TREND CHART ──────────────────────────────────────── -->
+<section class="section">
+  <div class="section-header">
+    <h2 class="section-title">Läns-trend — Solceller</h2>
+    <span class="section-badge badge-solar">MW Installerat</span>
+  </div>
+  <p class="section-desc">Välj upp till 5 län att jämföra (installerad effekt MW).</p>
+  <div class="chart-card">
+    <div id="sol-trend-county-picks" style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem;"></div>
+    <canvas id="sol-trend-chart"></canvas>
+  </div>
+  <p class="source-note">Källa: Energimyndigheten, EN0123_1.</p>
+</section>
+
+
+  <section class="section">
+  <div class="prose-grid">
+    <div class="prose">
+      <h2 class="section-title" style="margin-bottom:16px">Om <em>statistiken</em></h2>
+      <p>Elprisdatan hämtas från <strong>elprisetjustnu.se</strong> som vidarepublicerar Nord Pools spotpriser var 15:e minut. Energimixen (vattenkraft, vindkraft, solkraft, kärnkraft) och förnybar kapacitet per län hämtas från <strong>Energimyndighetens</strong> PX-Web databas (EN0202_25, EN0105_3, EN0123_1).</p>
+      <p>Sverige har ett av Europas lägsta koldioxidavtryck per kWh tack vare kombinationen vatten- och kärnkraft. Under 2024 kom ca 98% av elproduktionen från koldioxidfri energi. Vindkraftens andel har ökat från under 1% år 2000 till drygt 20% 2024 och fortsätter att växa snabbt.</p>
+    </div>
+    <div>
+      <h2 class="section-title" style="margin-bottom:16px">Vanliga <em>frågor</em></h2>
+      <details>
+        <summary>Varför är elpriset olika i norr och söder?</summary>
+        <p>Sverige saknar tillräcklig elnätkapacitet att fritt flytta överskottsproduktion från vattenkraften i norr till södra Sveriges förbrukningscentra. SE1/SE2 exporterar el, SE3/SE4 importerar — prisskillnaden kallas flaskhals-ränta.</p>
+      </details>
+      <details>
+        <summary>Ingår moms och skatter i priset?</summary>
+        <p>Nej. Priserna som visas är rena spotpriser (börspriser) exklusive energiskatt (~54 öre/kWh 2025), elcertifikat, nätavgift och 25% moms. Det faktiska priset på elräkningen är typiskt 2–4× spotpriset.</p>
+      </details>
+      <details>
+        <summary>Vad är TWh och MW?</summary>
+        <p>TWh (terawattimme) = 1 miljard kWh och används för att mäta årsproduktion. MW (megawatt) = 1 000 kW och mäter installerad kapacitet (maxeffekt). En vindturbin på 4 MW som kör på full effekt i 2 000 timmar/år producerar 8 GWh.</p>
+      </details>
+      <details>
+        <summary>Varför är solkraften liten i statistiken?</summary>
+        <p>Solkraft är en ung energikälla i Sverige — storskalig utbyggnad tog fart runt 2018. Trots kraftig tillväxt (tiodubbling på 6 år) är det totala energibidraget ännu litet jämfört med vind- och vattenkraft. Produktionen är också säsongsvarierande och låg vintertid.</p>
+      </details>
+      <details>
+        <summary>Varför saknas vindkraft och solkraft för 2024 i energimixen?</summary>
+        <p>Energimyndighetens nationella tabell EN0202_25 publiceras med viss fördröjning. Preliminär statistik för 2024 var ännu inte tillgänglig vid senaste synkronisering — använd vindkraftstatistiken per län (EN0105_3) för aktuellare data.</p>
+      </details>
+    </div>
+  </div>
+  </section>
+<footer>
+  <span>Sverige Nu · Öppen data</span>
+  <span>Källa: Energimyndigheten, Nord Pool / elprisetjustnu</span>
+  <a href="/om" style="color:var(--muted)">Om sidan</a>
+</footer>
+
+<script src="/js/energi.js"></script>
+  <script src="/js/nav.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+# Environment — contains secrets (API keys, DB passwords)
+.env
+
+# Go build output
+backend/swedennu
+backend/*.exe
+
+# Go test cache and coverage
+*.test
+*.out
+coverage.html
+
+# Go tool cache (vendoring not used)
+vendor/
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker volumes and local data
+postgres-data/
+data/
+
+# Log files
+*.log
+logs/
+
+# Temp / scratch files
+*.tmp
+*.bak
+
+# Private planning notes
+PLANNING.md
+STATUS.md 
+DATA_SOURCES.md
+
+# Python cache
+__pycache__/
+*.pyc
